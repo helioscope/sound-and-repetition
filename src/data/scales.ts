@@ -1,8 +1,8 @@
 export interface MusicalScale {
   id : string,
   name : string,
-  intervals : Number[],
-  mode? : Number | undefined,
+  intervals : number[],
+  mode? : number | undefined,
   info? : string | undefined
 };
 

@@ -1,7 +1,7 @@
 export interface ChordDefinition {
   id : string,
   label : string,
-  intervals : Number[]
+  intervals : number[]
 };
 
 export const chords : ChordDefinition[] = [
