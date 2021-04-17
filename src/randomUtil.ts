@@ -31,7 +31,7 @@ export function randomPull(optionsArr: any[], numPicks: number, mutate=false) {
     numPicks = optionsArr.length;
   }
   
-  if (mutate == false) {
+  if (mutate === false) {
     optionsArr = optionsArr.slice();
   }
 

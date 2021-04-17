@@ -19,7 +19,7 @@ export const scales : MusicalScale[] = [
   // heptatonic (7 tones)
   {
     id : "aeoliean",
-    name : "aeoliean",
+    name : "natural minor (aeoliean)",
     mode : 1,
     intervals : [2,1,2,2,1,2,2],
     info: "(aka the 'natural minor' scale)"
@@ -47,7 +47,7 @@ export const scales : MusicalScale[] = [
   },
   {
     id : "ionian",
-    name : "ionian",
+    name : "major (ionian)",
     mode : 3,
     intervals : [2,2,1,2,2,2,1],
     info: "(aka the 'major' scale)"
@@ -80,18 +80,18 @@ export const scales : MusicalScale[] = [
     intervals : [2,2,1,2,2,1,2],
     info: ""
   },
-  // note: these are just the 'Heptatonia prima'; there are more: https://en.wikipedia.org/wiki/Heptatonic_scale
+  // note: these are mostly just the 'Heptatonia prima'; there are more: https://en.wikipedia.org/wiki/Heptatonic_scale
   
   // pentatonic (five tones)
   {
-    id : "minor",
-    name : "minor",
+    id : "pentatonic_minor",
+    name : "pentatonic minor",
     mode : 1,
     intervals : [3,2,2,3,2]
   },
   {
-    id : "major",
-    name : "major",
+    id : "pentatonic_major",
+    name : "pentatonic major",
     mode : 2,
     intervals : [2,2,3,2,3]
   },

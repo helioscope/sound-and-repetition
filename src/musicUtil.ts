@@ -1,14 +1,22 @@
 import * as Tone from 'tone';
 import NoteObject from './data/NoteObject';
-import {ChordDefinition} from './data/chords';
-import {MusicalScale} from './data/scales';
+import { ChordDefinition } from './data/chords';
+import { MusicalScale } from './data/scales';
+import { remapValue } from './randomUtil';
 
 let enabledAudio = false;
 let synth: Tone.PolySynth;
 
+const VOLUME_MIN = -20;
+const VOLUME_MAX = 20;
+
 
 export function initSynth() {
   synth = new Tone.PolySynth().toDestination();
+}
+
+export function setMasterVolume(newVol: number) {
+  Tone.getDestination().volume.value = remapValue(newVol, 0, 1, VOLUME_MIN, VOLUME_MAX);
 }
 
 
