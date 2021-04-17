@@ -7,6 +7,12 @@ import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
+import {initSynth, playNoteSequence, getScaleNotes} from './musicUtil';
+import NoteObject from './data/NoteObject';
+import {MusicalScale, scales} from './data/scales';
+import {pitches} from './data/pitches';
+import { randomPickOne } from './randomUtil';
+
 const theme : Theme = createMuiTheme({
   palette: {
     type: "dark",
@@ -18,44 +24,90 @@ const theme : Theme = createMuiTheme({
   },
 });
 
+type ExerciseId = 'intervals' | 'pitches' | 'chords' | 'scales';
+const exercises : ExerciseId[] = [
+  // 'intervals',
+  // 'pitches',
+  // 'chords',
+  'scales'
+];
+
 type AppState = {
-  selected: boolean
+  activeExercise: ExerciseId,
+  isPlaying: boolean
 };
+
+let playTimeout : number | undefined;
 
 class App extends React.Component {
   state : AppState = {
-    selected : false
+    activeExercise: exercises[0],
+    isPlaying: false
+  }
+  componentDidMount() {
+    initSynth();
+  }
+  adoptExercise(id:ExerciseId) {
+    this.setState({activeExercise : id});
+  }
+  togglePlay() {
+    this.setState({ isPlaying : !this.state.isPlaying }, ()=>{
+      if (this.state.isPlaying) {
+        this.startExercise();
+      } else {
+        this.cancelExercise();
+      }
+    });
+  }
+  startExercise() {
+    let rootNote = new NoteObject({pitch: randomPickOne(pitches), octave: 3});
+    let scale: MusicalScale | undefined = scales.find((s)=>{return s.id === 'ionian'});
+    if (scale) {
+      let noteInterval = 0.35;
+      let playDuration = noteInterval * (scale.intervals.length + 1) + 1;
+      playNoteSequence(getScaleNotes(rootNote, scale), noteInterval);
+      playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, playDuration * 1000);
+    } else {
+      throw new Error("Unable to find 'ionian' scale");
+    }
+  }
+  cancelExercise() {
+    clearTimeout(playTimeout);
+    playTimeout = undefined;
+  }
+  onPlayTimeout() {
+    if (this.state.isPlaying) {
+      this.startExercise();
+    }
   }
   render() {
+    const activeExercise = this.state.activeExercise;
+    const exerciseToggles = exercises.map((exerciseId:ExerciseId) => {
+      // Note: ToggleButton doesn't support a "color" prop.
+      return (
+        <ToggleButton value="intervals"
+            selected={activeExercise === exerciseId}
+            onChange={() => {
+              this.adoptExercise(exerciseId);
+            }}>
+          {exerciseId}
+        </ToggleButton>
+      )
+    })
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <div className="App">
           <Container>
-            <div>Container</div>
-            <div>
-              <Button variant="contained">Default contained</Button>
-              <Button variant="outlined">Default outlined</Button>
-              <Button>Default default</Button>
+            <div className="exercise-selector">
+              {exerciseToggles}
             </div>
-            <div>
-              <Button color="primary" variant="contained">Primary contained</Button>
-              <Button color="primary" variant="outlined">Primary outlined</Button>
-              <Button color="primary">Primary default</Button>
-            </div>
-            <div>
-              <Button color="secondary" variant="contained">Secondary contained</Button>
-              <Button color="secondary" variant="outlined">Secondary outlined</Button>
-              <Button color="secondary">Secondary default</Button>
-            </div>
-            <div>
-              {/* Note: ToggleButton doesn't support a "color" prop. */}
-              <ToggleButton value="check"
-                  selected={this.state.selected}
-                  onChange={() => {
-                    this.setState({selected : !this.state.selected});
-                  }}>
-                Toggle
+            <div className="main-controls">
+              <ToggleButton
+                  value="play"
+                  selected={this.state.isPlaying}
+                  onChange={()=>{this.togglePlay();}}>
+                play
               </ToggleButton>
             </div>
           </Container>
