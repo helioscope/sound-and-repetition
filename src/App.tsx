@@ -2,7 +2,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Button, Container, Slider, Typography } from '@material-ui/core';
+import { Button, Container, Grid, Slider, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
@@ -216,25 +216,27 @@ class App extends React.Component {
               {scaleChoices}
             </div>
             <div className="main-controls">
-              <div>
-                <Typography gutterBottom>
-                  Volume
-                </Typography>
-                <Slider 
-                    value={this.state.masterVolume}
-                    onChange={(evt, newVal)=>{this.setVolume(newVal as number)}}
-                    min={0}
-                    max={1}
-                    step={0.001}/>
-              </div>
-              <div>
-                <ToggleButton
-                    value="play"
-                    selected={this.state.isPlaying}
-                    onChange={()=>{this.togglePlay();}}>
-                  play
-                </ToggleButton>
-              </div>
+              <Grid container spacing={6}>
+                <Grid item sm={3}>
+                  <Typography gutterBottom>
+                    Volume
+                  </Typography>
+                  <Slider 
+                      value={this.state.masterVolume}
+                      onChange={(evt, newVal)=>{this.setVolume(newVal as number)}}
+                      min={0}
+                      max={1}
+                      step={0.001}/>
+                </Grid>
+                <Grid item>
+                  <ToggleButton
+                      value="play"
+                      selected={this.state.isPlaying}
+                      onChange={()=>{this.togglePlay();}}>
+                    play
+                  </ToggleButton>
+                </Grid>
+              </Grid>
             </div>
           </Container>
         </div>
