@@ -74,7 +74,11 @@ type AppState = {
   isPlaying: boolean,
   masterVolume: number,
   scaleSelections: Map<MusicalScale, boolean>,
-  rootPitchSelections: Map<Pitch, boolean>
+  rootPitchSelections: Map<Pitch, boolean>,
+  exerciseState: 'not-started' | 'started' | 'completed',
+  currentScale: MusicalScale | undefined,
+  currentPitch: Pitch | undefined,
+  // scalePlaySpeed: number
 };
 
 // Map doesn't have a filter() or map() method but it's easy to check if one is selected
@@ -87,8 +91,13 @@ class App extends React.Component {
     activeExercise: exercises[0],
     isPlaying: false,
     masterVolume: 0.5,
+    exerciseState: 'not-started',
+
     rootPitchSelections: new Map().set( (pitches.find((p)=>{return p.names[0] === 'C'}) || pitches[0]) , true),
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
+    currentScale: undefined,
+    currentPitch: undefined,
+    // scalePlaySpeed: 1
   }
   componentDidMount() {
     initSynth();
@@ -118,6 +127,7 @@ class App extends React.Component {
     let scale : MusicalScale | undefined;
     let pitch : Pitch | undefined;
     let playDuration: number; // use seconds
+    let exerciseState = 'not started';
     
     if (selectedScales.length > 0) {
       scale = randomPickOne(selectedScales);
@@ -129,16 +139,43 @@ class App extends React.Component {
 
     if (scale && pitch) {
       const rootNote = new NoteObject({pitch: pitch, octave: 3});
-      let noteInterval = 0.35;
+      const noteInterval = 0.35;
+      const delayBeforeScaleReadOut = 1;
       
       playNoteSequence(getScaleNotes(rootNote, scale), noteInterval);
-      playDuration = noteInterval * (scale.intervals.length + 1) + 1;
+      playDuration = noteInterval * (scale.intervals.length + 1) + delayBeforeScaleReadOut;
+      exerciseState = 'started';
     } else {
       // we'll just retry after this duration, in case a scale + pitch has been selected.
       playDuration = 0.25;
+      exerciseState = 'not started'
     }
 
     playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, playDuration * 1000);
+    this.setState({
+      currentScale: scale,
+      currentPitch: pitch,
+      exerciseState: exerciseState
+    });
+  }
+  continueExercise() {
+    let currentPitch = this.state.currentPitch;
+    let currentScale = this.state.currentScale;
+    if (currentPitch && currentScale) {
+      let utterance = new SpeechSynthesisUtterance(currentPitch.names[0] + " " + currentScale.name);
+      let utteranceWait = 2.5;
+
+      utterance.volume = this.state.masterVolume;
+      window.speechSynthesis.speak(utterance);
+
+      this.setState({
+        exerciseState: 'completed'
+      }, () => {
+        playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, utteranceWait * 1000);
+      });
+    } else {
+      throw new Error('currentPitch and currentScale must be assigned to continue the exercise');
+    }
   }
   cancelExercise() {
     clearTimeout(playTimeout);
@@ -146,7 +183,16 @@ class App extends React.Component {
   }
   onPlayTimeout() {
     if (this.state.isPlaying) {
-      this.startExercise();
+      const exerciseState = this.state.exerciseState;
+      if (exerciseState === 'not-started') {
+        this.startExercise();
+      } else if (exerciseState === 'started') {
+        this.continueExercise();
+      } else if (exerciseState === 'completed') {
+        this.startExercise();
+      } else {
+        throw new Error(`unhandled exercise state: ${exerciseState}`);
+      }
     }
   }
   getSelectionArray<ValueType>(scalesMap: Map<ValueType, boolean>) : ValueType[] {
@@ -195,7 +241,6 @@ class App extends React.Component {
   render() {
     const activeExercise = this.state.activeExercise;
     const exerciseToggles = exercises.map((exerciseId:ExerciseId) => {
-      // Note: ToggleButton doesn't support a "color" prop.
       return (
         <ToggleButton 
             key={exerciseId}
