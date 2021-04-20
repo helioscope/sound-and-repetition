@@ -158,6 +158,40 @@ class App extends React.Component {
     });
     return selectedScales;
   }
+  renderScaleExerciseConfig() {
+    const scaleSelections = this.state.scaleSelections;
+    const scaleChoices = (
+      <AnyAllNoneToggleSet
+          label={"Scales:"}
+          itemCollection={scalesCollection}
+          itemToggleStates={scaleSelections}
+          onChange={(event, newSelections) => {
+            this.setState({
+              scaleSelections: newSelections
+            })
+          }}/>
+    );
+    const rootPitchSelections = this.state.rootPitchSelections;
+    const rootPitchChoices = (
+      <AnyAllNoneToggleSet
+          label={"Root pitches:"}
+          itemCollection={rootPitchCollection}
+          itemToggleStates={rootPitchSelections}
+          onChange={(event, newSelections) => {
+            this.setState({
+              rootPitchSelections: newSelections
+            })
+          }}/>
+    );
+
+    return (
+      <div className="exercise-config">
+        {rootPitchChoices}
+        {scaleChoices}
+      </div>
+
+    );
+  }
   render() {
     const activeExercise = this.state.activeExercise;
     const exerciseToggles = exercises.map((exerciseId:ExerciseId) => {
@@ -174,30 +208,7 @@ class App extends React.Component {
         </ToggleButton>
       )
     });
-    const scaleSelections = this.state.scaleSelections;
-    const scaleChoices = (
-      <AnyAllNoneToggleSet
-          label={"Scales:"}
-          itemCollection={scalesCollection}
-          itemToggleStates={scaleSelections}
-          onChange={(event, newSelections) => {
-            this.setState({
-              scaleSelections: newSelections
-            })
-          }}/>
-    );
-    const rootPitchSelections = this.state.rootPitchSelections;
-    let rootPitchChoices = (
-      <AnyAllNoneToggleSet
-          label={"Root pitches:"}
-          itemCollection={rootPitchCollection}
-          itemToggleStates={rootPitchSelections}
-          onChange={(event, newSelections) => {
-            this.setState({
-              rootPitchSelections: newSelections
-            })
-          }}/>
-    );
+    
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -209,15 +220,10 @@ class App extends React.Component {
               </Typography>
               {exerciseToggles}
             </div>
-            <div className="scale-choices">
-              {rootPitchChoices}
-            </div>
-            <div className="scale-choices">
-              {scaleChoices}
-            </div>
+            {this.renderScaleExerciseConfig()}
             <div className="main-controls">
               <Grid container spacing={6}>
-                <Grid item sm={3}>
+                <Grid item xs={6} sm={3}>
                   <Typography gutterBottom>
                     Volume
                   </Typography>
