@@ -1,0 +1,36 @@
+.AnyAllNoneToggleSet {
+  margin: 20px 0;
+}
+
+.AnyAllNoneToggleSet .body {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+}
+
+.AnyAllNoneToggleSet .grouped-toggles {
+  margin-bottom: 6px;
+}
+
+.AnyAllNoneToggleSet .group-label {
+  margin-bottom: 1px;
+}
+
+.AnyAllNoneToggleSet .grouped-toggles .MuiToggleButton-root {
+  margin-right: 3px;
+  margin-left: 0;
+  margin-bottom: 3px;
+  min-width: 28px;
+}
+
+.AnyAllNoneToggleSet .all-none-buttons {
+  margin-top: 10px;
+}
+
+.AnyAllNoneToggleSet .all-none-buttons button {
+  margin-right: 4px;
+}
+
+/* fix inexplicably-collapsed border for Material-UI ToggleButton (note: left-margin also collapses) */
+.AnyAllNoneToggleSet .MuiToggleButton-root.Mui-selected + .MuiToggleButton-root.Mui-selected {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

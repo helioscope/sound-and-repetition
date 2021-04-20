@@ -2,7 +2,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Container, Slider, Typography } from '@material-ui/core';
+import { Button, Container, Slider, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
@@ -12,6 +12,7 @@ import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
 import { randomPickOne } from './randomUtil';
+import AnyAllNoneToggleSet, {ToggleItemGroupType, ToggleItemType} from './AnyAllNoneToggleSet';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -32,12 +33,48 @@ const exercises : ExerciseId[] = [
   'scales'
 ];
 
+
+const rootPitchCollection = pitches.map((pitch)=>{
+  return {
+    label: pitch.names[0],
+    value: pitch
+  }
+});
+
+const scalesCollection = ( () : ToggleItemGroupType[] => {
+  let scaleToggleItems = scales.map((scale) => {
+    return {
+      label: scale.name,
+      key: scale.id,
+      value: scale
+    };
+  });
+  
+  return [
+    {
+      label: '7-tone',
+      items: scaleToggleItems.filter((item) => {return item.value.intervals.length === 7;})
+    },
+    {
+      label: '5-tone',
+      items: scaleToggleItems.filter((item) => {return item.value.intervals.length === 5;})
+    },
+    {
+      label: 'other',
+      items: scaleToggleItems.filter((item) => {
+        let toneCount = item.value.intervals.length;
+        return  toneCount !== 7 && toneCount !== 5;
+      })
+    },
+  ];
+})();
+
 type AppState = {
   activeExercise: ExerciseId,
   isPlaying: boolean,
   masterVolume: number,
   scaleSelections: Map<MusicalScale, boolean>,
-  rootNoteChoice: Pitch | null
+  rootPitchSelections: Map<Pitch, boolean>
 };
 
 // Map doesn't have a filter() or map() method but it's easy to check if one is selected
@@ -50,7 +87,7 @@ class App extends React.Component {
     activeExercise: exercises[0],
     isPlaying: false,
     masterVolume: 0.5,
-    rootNoteChoice: null,
+    rootPitchSelections: new Map().set( (pitches.find((p)=>{return p.names[0] === 'C'}) || pitches[0]) , true),
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
   }
   componentDidMount() {
@@ -76,18 +113,29 @@ class App extends React.Component {
     })
   }
   startExercise() {
-    const pitch = this.state.rootNoteChoice ? this.state.rootNoteChoice : randomPickOne(pitches);
-    const rootNote = new NoteObject({pitch: pitch, octave: 3});
-    const selectedScales = this.getSelectedScalesArray(this.state.scaleSelections);
+    const selectedPitches = this.getSelectionArray<Pitch>(this.state.rootPitchSelections);
+    const selectedScales = this.getSelectionArray<MusicalScale>(this.state.scaleSelections);
+    let scale : MusicalScale | undefined;
+    let pitch : Pitch | undefined;
     let playDuration: number; // use seconds
     
     if (selectedScales.length > 0) {
-      const scale = randomPickOne(selectedScales);
+      scale = randomPickOne(selectedScales);
+    }
+
+    if (selectedPitches.length > 0) {
+      pitch = randomPickOne(selectedPitches);
+    }
+
+    if (scale && pitch) {
+      const rootNote = new NoteObject({pitch: pitch, octave: 3});
       let noteInterval = 0.35;
-      playDuration = noteInterval * (scale.intervals.length + 1) + 1;
+      
       playNoteSequence(getScaleNotes(rootNote, scale), noteInterval);
+      playDuration = noteInterval * (scale.intervals.length + 1) + 1;
     } else {
-      playDuration = 0.25; // we'll just retry after this duration, in case a scale has been selected.
+      // we'll just retry after this duration, in case a scale + pitch has been selected.
+      playDuration = 0.25;
     }
 
     playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, playDuration * 1000);
@@ -101,8 +149,8 @@ class App extends React.Component {
       this.startExercise();
     }
   }
-  getSelectedScalesArray(scalesMap: Map<MusicalScale, boolean>) : MusicalScale[] {
-    let selectedScales: MusicalScale[] = [];
+  getSelectionArray<ValueType>(scalesMap: Map<ValueType, boolean>) : ValueType[] {
+    let selectedScales: ValueType[] = [];
     scalesMap.forEach((isSelected, scale)=>{
       if (isSelected) {
         selectedScales.push(scale);
@@ -127,39 +175,29 @@ class App extends React.Component {
       )
     });
     const scaleSelections = this.state.scaleSelections;
-    const scaleChoices = scales.map((scale) => {
-      return (
-        <ToggleButton
-            key={scale.id}
-            value={scale.id}
-            selected={scaleSelections.get(scale)}
-            onChange={() => {
-              let newSelectionSet = new Map(scaleSelections);
-              newSelectionSet.set(scale, !scaleSelections.get(scale));
-              this.setState({
-                scaleSelections: newSelectionSet
-              });
-            }}>
-          {scale.name}
-        </ToggleButton>
-      );
-    });
-    const rootPitchChoice = this.state.rootNoteChoice;
-    let rootPitchChoices = pitches.map((pitch)=>{
-      return (
-        <ToggleButton
-            key={pitch.index}
-            value={pitch.index}
-            selected={rootPitchChoice === pitch}
-            onChange={() => {
-              this.setState({
-                rootNoteChoice: pitch
-              });
-            }}>
-          {pitch.names[0]}
-        </ToggleButton>
-      );
-    })
+    const scaleChoices = (
+      <AnyAllNoneToggleSet
+          label={"Scales:"}
+          itemCollection={scalesCollection}
+          itemToggleStates={scaleSelections}
+          onChange={(event, newSelections) => {
+            this.setState({
+              scaleSelections: newSelections
+            })
+          }}/>
+    );
+    const rootPitchSelections = this.state.rootPitchSelections;
+    let rootPitchChoices = (
+      <AnyAllNoneToggleSet
+          label={"Root pitches:"}
+          itemCollection={rootPitchCollection}
+          itemToggleStates={rootPitchSelections}
+          onChange={(event, newSelections) => {
+            this.setState({
+              rootPitchSelections: newSelections
+            })
+          }}/>
+    );
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -167,19 +205,13 @@ class App extends React.Component {
           <Container>
             <div className="exercise-selector">
               <Typography gutterBottom>
-                Exercise type:
+                Exercise:
               </Typography>
               {exerciseToggles}
             </div>
-            <Typography gutterBottom>
-              Root pitch:
-            </Typography>
             <div className="scale-choices">
               {rootPitchChoices}
             </div>
-            <Typography gutterBottom>
-              Scales to play:
-            </Typography>
             <div className="scale-choices">
               {scaleChoices}
             </div>
