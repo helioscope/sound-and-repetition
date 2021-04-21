@@ -33,11 +33,37 @@ export function playNote(note: NoteObject) {
   synth.triggerAttackRelease(note.stringify(), "8n", Tone.now());
 }
 
-export function playNoteSequence(notes: NoteObject[], delay=0.5) {
+export function playNoteSequence(notes: NoteObject[], delay:number=0.5, noteLengths:number[]|number=0.5, velocities:number[]|number=0.8) {
   let totalNotes = notes.length;
   enableAudio();
+  if (typeof noteLengths === 'number') {
+    noteLengths = new Array(totalNotes).fill(noteLengths as number);
+  } else if (noteLengths instanceof Array) {
+    noteLengths = noteLengths as number[];
+    if (noteLengths.length < totalNotes) {
+      console.warn('Warning: there are more notes than noteLengths entered. Using a default value as fallback');
+      while (noteLengths.length < totalNotes) {
+        noteLengths.push(1);
+      }
+    }
+  } else {
+    throw new Error('noteLengths was provided as an unhandled type');
+  }
+  if (typeof velocities === 'number') {
+    velocities = new Array(totalNotes).fill(velocities as number);
+  } else if (velocities instanceof Array) {
+    velocities = velocities as number[];
+    if (velocities.length < totalNotes) {
+      console.warn('Warning: there are more notes than velocities entered. Using a default value as fallback');
+      while (velocities.length < totalNotes) {
+        velocities.push(1);
+      }
+    }
+  } else {
+    throw new Error('velocities was provided as an unhandled type');
+  }
   for (let i = 0; i < totalNotes; i++) {
-    synth.triggerAttackRelease(notes[i].stringify(), "8n", Tone.now() + (delay * i));
+    synth.triggerAttackRelease(notes[i].stringify(), noteLengths[i], Tone.now() + (delay * i), velocities[i]);
   }
 }
 

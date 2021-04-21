@@ -2,7 +2,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Button, Container, Grid, Slider, Typography } from '@material-ui/core';
+import { Container, FormControlLabel, Grid, Slider, Switch, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
@@ -12,7 +12,7 @@ import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
 import { randomPickOne } from './randomUtil';
-import AnyAllNoneToggleSet, {ToggleItemGroupType, ToggleItemType} from './AnyAllNoneToggleSet';
+import AnyAllNoneToggleSet, {ToggleItemGroupType} from './AnyAllNoneToggleSet';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -73,12 +73,24 @@ type AppState = {
   activeExercise: ExerciseId,
   isPlaying: boolean,
   masterVolume: number,
+
   scaleSelections: Map<MusicalScale, boolean>,
   rootPitchSelections: Map<Pitch, boolean>,
   exerciseState: 'not-started' | 'started' | 'completed',
   currentScale: MusicalScale | undefined,
   currentPitch: Pitch | undefined,
-  // scalePlaySpeed: number
+  currentScalePlayCount: number,
+  currentExerciseRepeatCount: number,
+  
+  // scalePlayMode: 'ascending' | 'descending', // later?
+  scalePlaySpeed: number,
+  scalePlayCount: number,
+  pauseBetweenScalePlays: number,
+  // randomizeNoteVelocities: boolean, // later?
+  readScaleName: boolean,
+  pauseBeforeNameReading: number,
+  repeats: number,
+  pauseBeforeEnd: number,
 };
 
 // Map doesn't have a filter() or map() method but it's easy to check if one is selected
@@ -97,7 +109,16 @@ class App extends React.Component {
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
     currentScale: undefined,
     currentPitch: undefined,
-    // scalePlaySpeed: 1
+    currentScalePlayCount: 0,
+    currentExerciseRepeatCount: 0,
+
+    scalePlaySpeed: 1,
+    scalePlayCount: 1,
+    pauseBetweenScalePlays: 1,
+    readScaleName: true,
+    pauseBeforeNameReading: 1,
+    repeats: 0,
+    pauseBeforeEnd: 1,
   }
   componentDidMount() {
     initSynth();
@@ -122,12 +143,24 @@ class App extends React.Component {
     })
   }
   startExercise() {
+    this.prepExercise(() => {
+      if (this.state.currentPitch && this.state.currentScale) {
+        this.playScale();
+      } else {
+        // try again in a bit
+        this.doAfterPause(()=>{
+          if (this.state.isPlaying) {
+            this.startExercise();
+          }
+        }, 0.25);
+      }
+    });
+  }
+  prepExercise(completionCallback:()=>void) {
     const selectedPitches = this.getSelectionArray<Pitch>(this.state.rootPitchSelections);
     const selectedScales = this.getSelectionArray<MusicalScale>(this.state.scaleSelections);
     let scale : MusicalScale | undefined;
     let pitch : Pitch | undefined;
-    let playDuration: number; // use seconds
-    let exerciseState = 'not started';
     
     if (selectedScales.length > 0) {
       scale = randomPickOne(selectedScales);
@@ -138,62 +171,93 @@ class App extends React.Component {
     }
 
     if (scale && pitch) {
-      const rootNote = new NoteObject({pitch: pitch, octave: 3});
-      const noteInterval = 0.35;
-      const delayBeforeScaleReadOut = 1;
-      
-      playNoteSequence(getScaleNotes(rootNote, scale), noteInterval);
-      playDuration = noteInterval * (scale.intervals.length + 1) + delayBeforeScaleReadOut;
-      exerciseState = 'started';
+      this.setState({
+        currentScale: scale,
+        currentPitch: pitch,
+        currentScalePlayCount: 0,
+        exerciseState: 'unstarted'
+      }, completionCallback);
     } else {
-      // we'll just retry after this duration, in case a scale + pitch has been selected.
-      playDuration = 0.25;
-      exerciseState = 'not started'
+      completionCallback();
     }
-
-    playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, playDuration * 1000);
-    this.setState({
-      currentScale: scale,
-      currentPitch: pitch,
-      exerciseState: exerciseState
-    });
   }
-  continueExercise() {
-    let currentPitch = this.state.currentPitch;
-    let currentScale = this.state.currentScale;
-    if (currentPitch && currentScale) {
-      let utterance = new SpeechSynthesisUtterance(currentPitch.names[0] + " " + currentScale.name);
-      let utteranceWait = 2.5;
+  playScale() {
+    let scale : MusicalScale | undefined = this.state.currentScale;
+    let pitch : Pitch | undefined = this.state.currentPitch;
 
-      utterance.volume = this.state.masterVolume;
-      window.speechSynthesis.speak(utterance);
+    if (scale && pitch) {
+      let playDuration: number; // use seconds
+      const rootNote = new NoteObject({pitch: pitch as Pitch, octave: 3});
+      const noteInterval = 0.35 / this.state.scalePlaySpeed;
+      const noteLength = noteInterval * 0.8;
+      const noteVelocity = 0.75;
+      
+      playDuration = noteInterval * (scale.intervals.length + 1);
 
       this.setState({
-        exerciseState: 'completed'
-      }, () => {
-        playTimeout = window.setTimeout(()=>{this.onPlayTimeout();}, utteranceWait * 1000);
+        currentScalePlayCount: this.state.currentScalePlayCount + 1,
+        exerciseState: 'started'
+      }, ()=>{
+        playNoteSequence(getScaleNotes(rootNote, scale as MusicalScale), noteInterval, noteLength, noteVelocity);
+        this.doAfterPause(()=>{this.onFinishScalePlay();}, playDuration);
       });
-    } else {
-      throw new Error('currentPitch and currentScale must be assigned to continue the exercise');
     }
+  }
+  onFinishScalePlay() {
+    console.log('finished playing scale');
+    if (this.state.currentScalePlayCount < this.state.scalePlayCount) {
+      console.log('will pause for ' + this.state.pauseBetweenScalePlays);
+      this.doAfterPause(()=>{this.playScale();}, this.state.pauseBetweenScalePlays);
+    } else if (this.state.readScaleName) {
+      this.doAfterPause(()=>{this.readScale();} ,this.state.pauseBeforeNameReading);
+    } else{
+      this.doAfterPause(()=>{this.onFinishExercise();}, this.state.pauseBeforeEnd);
+    }
+  }
+  readScale() {
+    const currentPitch = this.state.currentPitch;
+    const currentScale = this.state.currentScale;
+
+    if (currentPitch && currentScale) {
+      const utterance = new SpeechSynthesisUtterance(currentPitch.names[0] + " " + currentScale.name);
+
+      utterance.volume = this.state.masterVolume;
+      utterance.onend = utterance.onerror = () => {
+        this.onFinishScaleRead();
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    } else {
+      throw new Error('currentPitch and currentScale must be assigned to read the scale');
+    }
+  }
+  onFinishScaleRead() {
+    if (this.state.isPlaying === false) {
+      return;
+    }
+    if (this.state.currentExerciseRepeatCount < this.state.repeats) {
+      // repeat the whoel performance
+      this.setState({
+        currentExerciseRepeatCount: this.state.currentExerciseRepeatCount + 1,
+        currentScalePlayCount: 0
+      }, () => {
+        // start from beginning (maintaining the prep that was already done)
+        this.doAfterPause(()=>{this.playScale();}, this.state.pauseBeforeEnd);
+      })
+    } else {
+      this.doAfterPause(()=>{this.onFinishExercise();}, this.state.pauseBeforeEnd);
+    }
+  }
+  onFinishExercise() {
+    this.startExercise();
   }
   cancelExercise() {
     clearTimeout(playTimeout);
     playTimeout = undefined;
+    // could do more here, particularly to interrupt scale playback (when playing slowly) or utterance
   }
-  onPlayTimeout() {
-    if (this.state.isPlaying) {
-      const exerciseState = this.state.exerciseState;
-      if (exerciseState === 'not-started') {
-        this.startExercise();
-      } else if (exerciseState === 'started') {
-        this.continueExercise();
-      } else if (exerciseState === 'completed') {
-        this.startExercise();
-      } else {
-        throw new Error(`unhandled exercise state: ${exerciseState}`);
-      }
-    }
+  doAfterPause(action:()=>void, delayInSeconds: number) {
+    playTimeout = window.setTimeout(action, delayInSeconds * 1000);
   }
   getSelectionArray<ValueType>(scalesMap: Map<ValueType, boolean>) : ValueType[] {
     let selectedScales: ValueType[] = [];
@@ -234,6 +298,90 @@ class App extends React.Component {
       <div className="exercise-config">
         {rootPitchChoices}
         {scaleChoices}
+        <Grid container spacing={4}>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Scale Play Speed
+            </Typography>
+            <Slider 
+              value={this.state.scalePlaySpeed}
+              onChange={(evt, newVal)=>{this.setState({scalePlaySpeed: newVal})}}
+              min={0.1}
+              max={4.0}
+              step={0.1}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Scale Play Count
+            </Typography>
+            <Slider 
+              value={this.state.scalePlayCount}
+              onChange={(evt, newVal)=>{this.setState({scalePlayCount: newVal})}}
+              min={1}
+              max={3}
+              step={1}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Pause Between Plays
+            </Typography>
+            <Slider 
+              value={this.state.pauseBetweenScalePlays}
+              onChange={(evt, newVal)=>{this.setState({pauseBetweenScalePlays: newVal})}}
+              min={0.1}
+              max={3.5}
+              step={0.1}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <FormControlLabel
+              control={
+                <Switch 
+                  color="primary"
+                  checked={this.state.readScaleName}
+                  onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
+                />
+              }
+              label="Read Scale Name"
+              labelPlacement="top"
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Pause Before Reading
+            </Typography>
+            <Slider 
+                value={this.state.pauseBeforeNameReading}
+                onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
+                min={0.1}
+                max={3.5}
+                step={0.1}/>
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Repeats
+            </Typography>
+            <Slider 
+                value={this.state.repeats}
+                onChange={(evt, newVal)=>{this.setState({repeats: newVal})}}
+                min={0}
+                max={4}
+                step={1}/>
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography align={"center"} gutterBottom>
+              Pause Before End
+            </Typography>
+            <Slider 
+                value={this.state.pauseBeforeEnd}
+                onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
+                min={0.1}
+                max={4.0}
+                step={0.1}/>
+          </Grid>
+        </Grid>
       </div>
 
     );

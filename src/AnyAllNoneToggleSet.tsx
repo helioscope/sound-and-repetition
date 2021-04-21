@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ToggleButton } from '@material-ui/lab';
-import { Container, Button, Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 
 import './AnyAllNoneToggleSet.css';
 
@@ -28,7 +28,7 @@ function isToggleItemGroup(thing: any): thing is ToggleItemGroupType {
   return (thing as ToggleItemGroupType).items instanceof Array;
 }
 
-export default (props:AnyAllNoneToggleSetProps) => {
+export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps) {
   const itemCollection = props.itemCollection;
   const itemToggleStates = props.itemToggleStates;
   let allItems: ToggleItemType[] = [];
