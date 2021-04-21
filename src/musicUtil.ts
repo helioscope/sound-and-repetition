@@ -62,9 +62,25 @@ export function playNoteSequence(notes: NoteObject[], delay:number=0.5, noteLeng
   } else {
     throw new Error('velocities was provided as an unhandled type');
   }
+  
+  // reset transport (prevents note-doubling, time-offset issues, etc)
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+
+  // sync synth to transport so we can interrupt/clear playback
+  synth.sync();
   for (let i = 0; i < totalNotes; i++) {
-    synth.triggerAttackRelease(notes[i].stringify(), noteLengths[i], Tone.now() + (delay * i), velocities[i]);
+    synth.triggerAttackRelease(notes[i].stringify(), noteLengths[i], 0 + (delay * i), velocities[i]);
   }
+  Tone.Transport.start();
+}
+
+export function cancelNotesPlayback() {
+  // this might be a bit excessive
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+  synth.unsync();
+  synth.releaseAll();
 }
 
 export function getScaleNotes(rootNote: NoteObject, scale: MusicalScale) {

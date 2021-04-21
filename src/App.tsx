@@ -7,7 +7,8 @@ import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
-import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume } from './musicUtil';
+import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './musicUtil';
+import { startSpeech, cancelSpeech } from './speechSynthesisUtil';
 import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
@@ -204,9 +205,7 @@ class App extends React.Component {
     }
   }
   onFinishScalePlay() {
-    console.log('finished playing scale');
     if (this.state.currentScalePlayCount < this.state.scalePlayCount) {
-      console.log('will pause for ' + this.state.pauseBetweenScalePlays);
       this.doAfterPause(()=>{this.playScale();}, this.state.pauseBetweenScalePlays);
     } else if (this.state.readScaleName) {
       this.doAfterPause(()=>{this.readScale();} ,this.state.pauseBeforeNameReading);
@@ -219,14 +218,10 @@ class App extends React.Component {
     const currentScale = this.state.currentScale;
 
     if (currentPitch && currentScale) {
-      const utterance = new SpeechSynthesisUtterance(currentPitch.names[0] + " " + currentScale.name);
-
-      utterance.volume = this.state.masterVolume;
-      utterance.onend = utterance.onerror = () => {
-        this.onFinishScaleRead();
-      };
-      
-      window.speechSynthesis.speak(utterance);
+      startSpeech(currentPitch.names[0] + " " + currentScale.name, {
+        volume: this.state.masterVolume,
+        onComplete: ()=>{this.onFinishScaleRead();}
+      });
     } else {
       throw new Error('currentPitch and currentScale must be assigned to read the scale');
     }
@@ -254,7 +249,8 @@ class App extends React.Component {
   cancelExercise() {
     clearTimeout(playTimeout);
     playTimeout = undefined;
-    // could do more here, particularly to interrupt scale playback (when playing slowly) or utterance
+    cancelNotesPlayback();
+    cancelSpeech();
   }
   doAfterPause(action:()=>void, delayInSeconds: number) {
     playTimeout = window.setTimeout(action, delayInSeconds * 1000);
