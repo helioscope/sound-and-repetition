@@ -179,7 +179,12 @@ class App extends React.Component {
         exerciseState: 'unstarted'
       }, completionCallback);
     } else {
-      completionCallback();
+      this.setState({
+        currentScale: undefined,
+        currentPitch: undefined,
+        currentScalePlayCount: 0,
+        exerciseState: 'unstarted'
+      }, completionCallback);
     }
   }
   playScale() {
@@ -218,7 +223,13 @@ class App extends React.Component {
     const currentScale = this.state.currentScale;
 
     if (currentPitch && currentScale) {
-      startSpeech(currentPitch.names[0] + " " + currentScale.name, {
+      let scaleName = currentPitch.names[0] + " ";
+      if (currentScale.spokenName) {
+        scaleName += currentScale.spokenName;
+      } else {
+        scaleName += currentScale.name;
+      }
+      startSpeech(scaleName, {
         volume: this.state.masterVolume,
         onComplete: ()=>{this.onFinishScaleRead();}
       });
@@ -231,7 +242,7 @@ class App extends React.Component {
       return;
     }
     if (this.state.currentExerciseRepeatCount < this.state.repeats) {
-      // repeat the whoel performance
+      // repeat the whole performance
       this.setState({
         currentExerciseRepeatCount: this.state.currentExerciseRepeatCount + 1,
         currentScalePlayCount: 0

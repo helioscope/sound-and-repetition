@@ -1,6 +1,7 @@
 export interface MusicalScale {
   id : string,
   name : string,
+  spokenName? : string,
   intervals : number[],
   mode? : number | undefined,
   info? : string | undefined
@@ -20,6 +21,7 @@ export const scales : MusicalScale[] = [
   {
     id : "aeoliean",
     name : "natural minor (aeoliean)",
+    spokenName : "natural minor",
     mode : 1,
     intervals : [2,1,2,2,1,2,2],
     info: "(aka the 'natural minor' scale)"
@@ -33,7 +35,7 @@ export const scales : MusicalScale[] = [
   },
   {
     id : "melodic_minor_asc",
-    name : "melodic minor (ascending)",
+    name : "melodic ascending minor",
     // mode : 1, // also derived from natural minor
     intervals : [2,1,2,2,2,2,1],
     info: "the spacing of the notes changes whether ascending or descending. this is technically the ascending scale. should this be listed as two scales?"
@@ -48,6 +50,7 @@ export const scales : MusicalScale[] = [
   {
     id : "ionian",
     name : "major (ionian)",
+    spokenName : "major",
     mode : 3,
     intervals : [2,2,1,2,2,2,1],
     info: "(aka the 'major' scale)"
@@ -79,6 +82,18 @@ export const scales : MusicalScale[] = [
     mode : 7,
     intervals : [2,2,1,2,2,1,2],
     info: ""
+  },
+  {
+    id : "major_minor",
+    name : "major minor",
+    intervals : [2,2,1,2,1,2,2],
+    info: "natural minor (aeolian), with a major third"
+  },
+  {
+    id : "phrygian_dominant",
+    name : "phrygian dominant",
+    intervals : [1,3,1,2,1,2,2],
+    info: "fifth mode of the harmonic minor scale"
   },
   // note: these are mostly just the 'Heptatonia prima'; there are more: https://en.wikipedia.org/wiki/Heptatonic_scale
   
