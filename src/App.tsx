@@ -8,7 +8,7 @@ import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
 import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './musicUtil';
-import { startSpeech, cancelSpeech } from './speechSynthesisUtil';
+import { startSpeech, cancelSpeech, setSpeechVolume } from './speechSynthesisUtil';
 import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
@@ -124,6 +124,9 @@ class App extends React.Component {
   componentDidMount() {
     initSynth();
   }
+  componentWillUnmount() {
+    this.cancelExercise();
+  }
   adoptExercise(id:ExerciseId) {
     this.setState({activeExercise : id});
   }
@@ -141,6 +144,7 @@ class App extends React.Component {
       masterVolume : newVolume
     }, ()=>{
       setMasterVolume(this.state.masterVolume);
+      setSpeechVolume(this.state.masterVolume);
     })
   }
   startExercise() {
