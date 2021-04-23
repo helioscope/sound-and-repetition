@@ -2,7 +2,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Container, FormControlLabel, Grid, Slider, Switch, Typography } from '@material-ui/core';
+import { Container, FormControl, FormControlLabel, NativeSelect, InputLabel, Grid, Slider, Switch, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
@@ -320,19 +320,26 @@ class App extends React.Component {
               min={0.1}
               max={4.0}
               step={0.1}
+              valueLabelDisplay="auto"
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
-              Scale Play Count
-            </Typography>
-            <Slider 
-              value={this.state.scalePlayCount}
-              onChange={(evt, newVal)=>{this.setState({scalePlayCount: newVal})}}
-              min={1}
-              max={3}
-              step={1}
-            />
+            <FormControl>
+              <InputLabel htmlFor="scale-play-count">Scale Play Count</InputLabel>
+              <NativeSelect
+                value={this.state.scalePlayCount}
+                onChange={(evt)=>{this.setState({scalePlayCount: evt.target.value})}}
+                inputProps={{
+                  name: 'scale-play-count',
+                  id: 'scale-play-count',
+                }}
+              >
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+              </NativeSelect>
+            </FormControl>
           </Grid>
           <Grid item xs={6} sm={4}>
             <Typography align={"center"} gutterBottom>
@@ -344,6 +351,7 @@ class App extends React.Component {
               min={0.1}
               max={3.5}
               step={0.1}
+              valueLabelDisplay="auto"
             />
           </Grid>
           <Grid item xs={6} sm={4}>
@@ -360,37 +368,50 @@ class App extends React.Component {
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
+            <Typography id="pause-before-reading-label" align={"center"} gutterBottom>
               Pause Before Reading
             </Typography>
-            <Slider 
-                value={this.state.pauseBeforeNameReading}
-                onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
-                min={0.1}
-                max={3.5}
-                step={0.1}/>
+            <Slider
+              aria-labelledby="pause-before-reading-label"
+              value={this.state.pauseBeforeNameReading}
+              onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
+              min={0.1}
+              max={3.5}
+              step={0.1}
+              valueLabelDisplay="auto"
+            />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
-              Repeats
-            </Typography>
-            <Slider 
+            <FormControl>
+              <InputLabel htmlFor="repeat-count">Repeats</InputLabel>
+              <NativeSelect
                 value={this.state.repeats}
-                onChange={(evt, newVal)=>{this.setState({repeats: newVal})}}
-                min={0}
-                max={4}
-                step={1}/>
+                onChange={(evt)=>{this.setState({repeats: evt.target.value})}}
+                inputProps={{
+                  name: 'repeat-count',
+                  id: 'repeat-count',
+                }}
+              >
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+              </NativeSelect>
+            </FormControl>
           </Grid>
           <Grid item xs={6} sm={4}>
             <Typography align={"center"} gutterBottom>
               Pause Before End
             </Typography>
             <Slider 
-                value={this.state.pauseBeforeEnd}
-                onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
-                min={0.1}
-                max={4.0}
-                step={0.1}/>
+              value={this.state.pauseBeforeEnd}
+              onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
+              min={0.1}
+              max={4.0}
+              step={0.1}
+              valueLabelDisplay="auto"
+            />
           </Grid>
         </Grid>
       </div>
