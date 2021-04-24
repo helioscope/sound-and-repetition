@@ -7,17 +7,17 @@ import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
-import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './musicUtil';
+import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './util/musicUtil';
 import { startSpeech, cancelSpeech, setSpeechVolume } from './speechSynthesisUtil';
 import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
-import { randomPickOne } from './randomUtil';
-import AnyAllNoneToggleSet, {ToggleItemGroupType} from './AnyAllNoneToggleSet';
-import DurationControl from './DurationControl';
-import SmallCountControl from './SmallCountControl';
-import MultiplierControl from './MultiplierControl';
-import BinaryControl from './BinaryControl';
+import { randomPickOne } from './util/chanceUtil';
+import AnyAllNoneToggleSet, {ToggleItemGroupType} from './components/AnyAllNoneToggleSet';
+import DurationControl from './components/DurationControl';
+import SmallCountControl from './components/SmallCountControl';
+import MultiplierControl from './components/MultiplierControl';
+import BinaryControl from './components/BinaryControl';
 
 const theme : Theme = createMuiTheme({
   palette: {

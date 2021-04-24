@@ -1,8 +1,8 @@
 import * as Tone from 'tone';
-import NoteObject from './data/NoteObject';
-import { ChordDefinition } from './data/chords';
-import { MusicalScale } from './data/scales';
-import { remapValue } from './randomUtil';
+import NoteObject from '../data/NoteObject';
+import { ChordDefinition } from '../data/chords';
+import { MusicalScale } from '../data/scales';
+import { remapValue } from './chanceUtil';
 
 let enabledAudio = false;
 let synth: Tone.PolySynth;
