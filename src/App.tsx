@@ -2,7 +2,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Container, FormControl, FormControlLabel, NativeSelect, InputLabel, Grid, Slider, Switch, Typography } from '@material-ui/core';
+import { Container, Grid, Slider, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
@@ -14,6 +14,10 @@ import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
 import { randomPickOne } from './randomUtil';
 import AnyAllNoneToggleSet, {ToggleItemGroupType} from './AnyAllNoneToggleSet';
+import DurationControl from './DurationControl';
+import SmallCountControl from './SmallCountControl';
+import MultiplierControl from './MultiplierControl';
+import BinaryControl from './BinaryControl';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -309,108 +313,79 @@ class App extends React.Component {
       <div className="exercise-config">
         {rootPitchChoices}
         {scaleChoices}
+
         <Grid container spacing={4}>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
-              Scale Play Speed
-            </Typography>
-            <Slider 
+            <MultiplierControl
+              label={"Scale Play Speed"}
+              inputId="scale-play-speed"
               value={this.state.scalePlaySpeed}
               onChange={(evt, newVal)=>{this.setState({scalePlaySpeed: newVal})}}
               min={0.1}
               max={4.0}
               step={0.1}
-              valueLabelDisplay="auto"
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <FormControl>
-              <InputLabel htmlFor="scale-play-count">Scale Play Count</InputLabel>
-              <NativeSelect
-                value={this.state.scalePlayCount}
-                onChange={(evt)=>{this.setState({scalePlayCount: evt.target.value})}}
-                inputProps={{
-                  name: 'scale-play-count',
-                  id: 'scale-play-count',
-                }}
-              >
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-                <option value={3}>3</option>
-                <option value={4}>4</option>
-              </NativeSelect>
-            </FormControl>
+            <SmallCountControl
+              label={"Scale Play Count"}
+              inputId={'scale-play-count'}
+              value={this.state.scalePlayCount}
+              onChange={(evt, newValue)=>{this.setState({scalePlayCount: newValue})}}
+              min={1}
+              max={4}
+            />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
-              Pause Between Plays
-            </Typography>
-            <Slider 
+            <DurationControl
+              label={"Pause Between Plays"}
+              inputId="pause-between-plays"
               value={this.state.pauseBetweenScalePlays}
               onChange={(evt, newVal)=>{this.setState({pauseBetweenScalePlays: newVal})}}
               min={0.1}
               max={3.5}
               step={0.1}
-              valueLabelDisplay="auto"
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <FormControlLabel
-              control={
-                <Switch 
-                  color="primary"
-                  checked={this.state.readScaleName}
-                  onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
-                />
-              }
-              label="Read Scale Name"
-              labelPlacement="top"
+            <BinaryControl
+              label={"Read Scale Name"}
+              inputId={"read-scale-name"}
+              format={"switch"}
+              value={this.state.readScaleName}
+              onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography id="pause-before-reading-label" align={"center"} gutterBottom>
-              Pause Before Reading
-            </Typography>
-            <Slider
-              aria-labelledby="pause-before-reading-label"
+            <DurationControl
+              label={"Pause Before Reading"}
+              inputId={"pause-before-reading"}
               value={this.state.pauseBeforeNameReading}
               onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
               min={0.1}
               max={3.5}
               step={0.1}
-              valueLabelDisplay="auto"
             />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <FormControl>
-              <InputLabel htmlFor="repeat-count">Repeats</InputLabel>
-              <NativeSelect
-                value={this.state.repeats}
-                onChange={(evt)=>{this.setState({repeats: evt.target.value})}}
-                inputProps={{
-                  name: 'repeat-count',
-                  id: 'repeat-count',
-                }}
-              >
-                <option value={0}>0</option>
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-                <option value={3}>3</option>
-                <option value={4}>4</option>
-              </NativeSelect>
-            </FormControl>
+            <SmallCountControl
+              label={"Repeats"}
+              inputId={'repeat-count'}
+              value={this.state.repeats}
+              onChange={(evt, newValue)=>{this.setState({repeats: newValue})}}
+              min={0}
+              max={4}
+            />
           </Grid>
           <Grid item xs={6} sm={4}>
-            <Typography align={"center"} gutterBottom>
-              Pause Before End
-            </Typography>
-            <Slider 
+            <DurationControl
+              label={"Pause Before End"}
+              inputId="pause-before-end"
               value={this.state.pauseBeforeEnd}
               onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
               min={0.1}
               max={4.0}
               step={0.1}
-              valueLabelDisplay="auto"
             />
           </Grid>
         </Grid>
