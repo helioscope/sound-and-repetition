@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { FormControl, InputLabel, NativeSelect } from '@material-ui/core';
+import { FormControl, RadioGroup, FormControlLabel, Radio, InputLabel, NativeSelect, Typography } from '@material-ui/core';
 
 type SmallCountControlProps = {
   inputId: string,
@@ -21,8 +21,13 @@ export default function SmallCountControl (props:SmallCountControlProps) {
   let optionElems = [];
 
   if (props.label) {
+    // label = (
+    //   <InputLabel htmlFor={props.inputId}>{props.label}</InputLabel>
+    // );
     label = (
-      <InputLabel htmlFor={props.inputId}>{props.label}</InputLabel>
+      <Typography align={"center"} gutterBottom>
+        {props.label}
+      </Typography>
     );
   }
   if (props.className) {
@@ -30,8 +35,11 @@ export default function SmallCountControl (props:SmallCountControlProps) {
   }
 
   for (let i = props.min; i < max; i += step) {
+    // optionElems.push(
+    //   <option key={i} value={i}>{i}</option>
+    // );
     optionElems.push(
-      <option key={i} value={i}>{i}</option>
+      <FormControlLabel key={i} value={i} control={<Radio />} label={i} labelPlacement="top" />
     );
   }
 
@@ -39,7 +47,7 @@ export default function SmallCountControl (props:SmallCountControlProps) {
     <div className={className}>
       <FormControl>
         {label}
-        <NativeSelect
+        {/* <NativeSelect
           value={props.value}
           onChange={(evt) => {props.onChange(evt, parseInt(evt.target.value))}}
           inputProps={{
@@ -48,7 +56,15 @@ export default function SmallCountControl (props:SmallCountControlProps) {
           }}
         >
           {optionElems}
-        </NativeSelect>
+        </NativeSelect> */}
+        <RadioGroup 
+          row 
+          name={props.inputId}
+          value={props.value}
+          onChange={(evt, value)=>{props.onChange(evt, parseInt(value))}}
+        >
+          {optionElems}
+        </RadioGroup>
       </FormControl>
     </div>
   );
