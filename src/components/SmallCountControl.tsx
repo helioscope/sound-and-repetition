@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { FormControl, RadioGroup, FormControlLabel, Radio, InputLabel, NativeSelect, Typography } from '@material-ui/core';
+import { Slider, Typography } from '@material-ui/core';
 
 type SmallCountControlProps = {
   inputId: string,
@@ -16,56 +16,37 @@ type SmallCountControlProps = {
 export default function SmallCountControl (props:SmallCountControlProps) {
   let className = "SmallCountControl";
   let label = null;
-  let max = props.max;
+  let labelId = undefined;
   let step = props.step || 1;
-  let optionElems = [];
+  const marks = [];
 
   if (props.label) {
-    // label = (
-    //   <InputLabel htmlFor={props.inputId}>{props.label}</InputLabel>
-    // );
+    labelId = props.inputId + "-label";
     label = (
-      <Typography align={"center"} gutterBottom>
-        {props.label}
+      <Typography id={labelId} align={"center"} gutterBottom>
+        {props.label}: {props.value}
       </Typography>
     );
   }
   if (props.className) {
     className += " " + props.className;
   }
-
-  for (let i = props.min; i < max; i += step) {
-    // optionElems.push(
-    //   <option key={i} value={i}>{i}</option>
-    // );
-    optionElems.push(
-      <FormControlLabel key={i} value={i} control={<Radio />} label={i} labelPlacement="top" />
-    );
+  for (let i = props.min; i <= props.max; i+= step) {
+    marks.push({value: i, label: i});
   }
-
   return (
     <div className={className}>
-      <FormControl>
-        {label}
-        {/* <NativeSelect
-          value={props.value}
-          onChange={(evt) => {props.onChange(evt, parseInt(evt.target.value))}}
-          inputProps={{
-            name: props.inputId,
-            id: props.inputId,
-          }}
-        >
-          {optionElems}
-        </NativeSelect> */}
-        <RadioGroup 
-          row 
-          name={props.inputId}
-          value={props.value}
-          onChange={(evt, value)=>{props.onChange(evt, parseInt(value))}}
-        >
-          {optionElems}
-        </RadioGroup>
-      </FormControl>
+      {label}
+      <Slider
+        aria-labelledby={labelId}
+        id={props.inputId}
+        value={props.value}
+        onChange={(evt, val) => {props.onChange(evt, val as number)}}
+        min={props.min}
+        max={props.max}
+        step={props.step}
+        marks={marks}
+      />
     </div>
   );
 }

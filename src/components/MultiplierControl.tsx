@@ -17,17 +17,24 @@ export default function MultiplierControl (props:MultiplierControlProps) {
   let className = "MultiplierControl";
   let label = null;
   let labelId = undefined;
+  const step = props.step || 1;
+  const marks = [];
   if (props.label) {
     labelId = props.inputId + "-label";
     label = (
       <Typography id={labelId} align={"center"} gutterBottom>
-        {props.label}
+        {props.label}: {props.value}x
       </Typography>
     );
   }
   if (props.className) {
     className += " " + props.className;
   }
+  // for (let i = props.min; i <= props.max; i+= step) {
+  //   marks.push({value: i, label: i});
+  // }
+  marks.push({value: props.min, label: props.min});
+  marks.push({value: props.max, label: props.max});
   return (
     <div className={className}>
       {label}
@@ -38,8 +45,8 @@ export default function MultiplierControl (props:MultiplierControlProps) {
         onChange={(evt, val) => {props.onChange(evt, val as number)}}
         min={props.min}
         max={props.max}
-        step={props.step || 0.1}
-        valueLabelDisplay="auto"
+        step={step}
+        marks={marks}
       />
     </div>
   );
