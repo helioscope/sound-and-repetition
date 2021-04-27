@@ -43,7 +43,7 @@ export default function BinaryControl (props:BinaryControlProps) {
     <div className={className}>
       <FormControlLabel
         control={controlElement}
-        label={props.label}
+        label={props.label + ": " + (props.value? "Yes" : "No")}
         labelPlacement="top"
       />
     </div>
