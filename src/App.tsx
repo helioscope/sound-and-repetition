@@ -365,6 +365,7 @@ class App extends React.Component {
               min={0.1}
               max={3.5}
               step={0.1}
+              disabled={!this.state.readScaleName}
             />
           </Grid>
           <Grid item xs={6} sm={4}>
