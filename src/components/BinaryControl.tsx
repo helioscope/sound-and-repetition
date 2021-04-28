@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './BinaryControl.css';
+
 import { FormControlLabel, Switch, Checkbox } from '@material-ui/core';
 
 type BinaryControlProps = {
