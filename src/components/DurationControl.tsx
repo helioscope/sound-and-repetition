@@ -10,7 +10,8 @@ type DurationControlProps = {
   min: number,
   max: number,
   step?: number,
-  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void
+  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void,
+  disabled?: boolean
 }
 
 export default function DurationControl (props:DurationControlProps) {
@@ -48,6 +49,7 @@ export default function DurationControl (props:DurationControlProps) {
         max={props.max}
         step={step}
         marks={marks}
+        disabled={props.disabled}
       />
     </div>
   );

@@ -8,7 +8,8 @@ type BinaryControlProps = {
   label: string,
   value: boolean,
   format: 'switch' | 'checkbox',
-  onChange: (event: React.ChangeEvent<{}>, newValue: boolean)=>void
+  onChange: (event: React.ChangeEvent<{}>, newValue: boolean)=>void,
+  disabled?: boolean
 }
 
 export default function BinaryControl (props:BinaryControlProps) {
@@ -45,6 +46,7 @@ export default function BinaryControl (props:BinaryControlProps) {
         control={controlElement}
         label={props.label + ": " + (props.value? "Yes" : "No")}
         labelPlacement="top"
+        disabled={props.disabled}
       />
     </div>
   );

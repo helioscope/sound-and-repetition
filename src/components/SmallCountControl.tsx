@@ -10,7 +10,8 @@ type SmallCountControlProps = {
   min: number,
   max: number,
   step?: number,
-  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void
+  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void,
+  disabled?: boolean
 }
 
 export default function SmallCountControl (props:SmallCountControlProps) {
@@ -46,6 +47,7 @@ export default function SmallCountControl (props:SmallCountControlProps) {
         max={props.max}
         step={props.step}
         marks={marks}
+        disabled={props.disabled}
       />
     </div>
   );

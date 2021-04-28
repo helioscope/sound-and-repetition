@@ -10,7 +10,8 @@ type MultiplierControlProps = {
   min: number,
   max: number,
   step?: number,
-  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void
+  onChange: (event: React.ChangeEvent<{}>, newValue: number)=>void,
+  disabled?: boolean
 }
 
 export default function MultiplierControl (props:MultiplierControlProps) {
@@ -47,6 +48,7 @@ export default function MultiplierControl (props:MultiplierControlProps) {
         max={props.max}
         step={step}
         marks={marks}
+        disabled={props.disabled}
       />
     </div>
   );
