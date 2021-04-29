@@ -8,7 +8,7 @@ import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
 import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './util/musicUtil';
-import { startSpeech, cancelSpeech, setSpeechVolume } from './speechSynthesisUtil';
+import { startSpeech, cancelSpeech, setSpeechVolume } from './util/speechSynthesisUtil';
 import NoteObject from './data/NoteObject';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
