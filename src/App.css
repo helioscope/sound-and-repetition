@@ -1,3 +1,33 @@
 .App .MuiFormControl-root {
   min-width: 140px;
 }
+
+.App .advanced-settings {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.App .advanced-settings .settings-group {
+  box-sizing: border-box;
+  width: calc(33.33% - 10px);
+  padding: 24px 36px;
+  background-color: rgba(255,255,255,0.05);
+  min-width: 292px;
+  margin: 5px;
+}
+
+.App .advanced-settings .settings-item {
+  height: 84px;
+}
+
+.App .advanced-settings .settings-group-header {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}

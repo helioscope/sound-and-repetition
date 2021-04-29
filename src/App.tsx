@@ -314,83 +314,103 @@ class App extends React.Component {
         {rootPitchChoices}
         {scaleChoices}
 
-        <Grid container spacing={4}>
-          <Grid item xs={6} sm={4}>
-            <MultiplierControl
-              label={"Scale Play Speed"}
-              inputId="scale-play-speed"
-              value={this.state.scalePlaySpeed}
-              onChange={(evt, newVal)=>{this.setState({scalePlaySpeed: newVal})}}
-              min={0.1}
-              max={4.0}
-              step={0.1}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <SmallCountControl
-              label={"Scale Play Count"}
-              inputId={'scale-play-count'}
-              value={this.state.scalePlayCount}
-              onChange={(evt, newValue)=>{this.setState({scalePlayCount: newValue})}}
-              min={1}
-              max={4}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <DurationControl
-              label={"Pause Between Plays"}
-              inputId="pause-between-plays"
-              value={this.state.pauseBetweenScalePlays}
-              onChange={(evt, newVal)=>{this.setState({pauseBetweenScalePlays: newVal})}}
-              min={0.1}
-              max={3.5}
-              step={0.1}
-              disabled={this.state.scalePlayCount === 1}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <BinaryControl
-              label={"Read Scale Name"}
-              inputId={"read-scale-name"}
-              format={"switch"}
-              value={this.state.readScaleName}
-              onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <DurationControl
-              label={"Pause Before Reading"}
-              inputId={"pause-before-reading"}
-              value={this.state.pauseBeforeNameReading}
-              onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
-              min={0.1}
-              max={3.5}
-              step={0.1}
-              disabled={!this.state.readScaleName}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <SmallCountControl
-              label={"Repeats"}
-              inputId={'repeat-count'}
-              value={this.state.repeats}
-              onChange={(evt, newValue)=>{this.setState({repeats: newValue})}}
-              min={0}
-              max={4}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4}>
-            <DurationControl
-              label={"Pause Before End"}
-              inputId="pause-before-end"
-              value={this.state.pauseBeforeEnd}
-              onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
-              min={0.1}
-              max={4.0}
-              step={0.1}
-            />
-          </Grid>
-        </Grid>
+        <div className="advanced-settings">
+
+          <div className="settings-group">
+            <div className="settings-group-header">
+              Scale Playback
+            </div>
+            <div className="settings-item">
+              <MultiplierControl
+                label={"Scale Play Speed"}
+                inputId="scale-play-speed"
+                value={this.state.scalePlaySpeed}
+                onChange={(evt, newVal)=>{this.setState({scalePlaySpeed: newVal})}}
+                min={0.1}
+                max={4.0}
+                step={0.1}
+              />
+            </div>
+            <div className="settings-item">
+              <SmallCountControl
+                label={"Scale Play Count"}
+                inputId={'scale-play-count'}
+                value={this.state.scalePlayCount}
+                onChange={(evt, newValue)=>{this.setState({scalePlayCount: newValue})}}
+                min={1}
+                max={4}
+              />
+            </div>
+            <div className="settings-item">
+              <DurationControl
+                label={"Pause Between Plays"}
+                inputId="pause-between-plays"
+                value={this.state.pauseBetweenScalePlays}
+                onChange={(evt, newVal)=>{this.setState({pauseBetweenScalePlays: newVal})}}
+                min={0.1}
+                max={3.5}
+                step={0.1}
+                disabled={this.state.scalePlayCount === 1}
+              />
+            </div>
+          </div>
+
+          <div className="settings-group">
+            <div className="settings-group-header">
+              Scale Name Reading
+            </div>
+            <div className="settings-item">
+              <BinaryControl
+                label={"Read Scale Name"}
+                inputId={"read-scale-name"}
+                format={"switch"}
+                value={this.state.readScaleName}
+                onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
+              />
+            </div>
+            <div className="settings-item">
+              <DurationControl
+                label={"Pause Before Reading"}
+                inputId={"pause-before-reading"}
+                value={this.state.pauseBeforeNameReading}
+                onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
+                min={0.1}
+                max={3.5}
+                step={0.1}
+                disabled={!this.state.readScaleName}
+              />
+            </div>
+          </div>
+
+          <div className="settings-group">
+            <div className="settings-group-header">
+              Ending
+            </div>
+            <div className="settings-item">
+              <DurationControl
+                label={"Pause Before End"}
+                inputId="pause-before-end"
+                value={this.state.pauseBeforeEnd}
+                onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
+                min={0.1}
+                max={4.0}
+                step={0.1}
+              />
+            </div>
+            <div className="settings-item">
+              <SmallCountControl
+                label={"Exercise Repeats"}
+                inputId={'repeat-count'}
+                value={this.state.repeats}
+                onChange={(evt, newValue)=>{this.setState({repeats: newValue})}}
+                min={0}
+                max={4}
+              />
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
     );
