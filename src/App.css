@@ -1,3 +1,7 @@
+.App {
+  padding-bottom: 72px;
+}
+
 .App .MuiFormControl-root {
   min-width: 140px;
 }
@@ -30,4 +34,22 @@
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 16px;
+}
+
+.App .main-controls {
+  box-sizing: border-box;
+
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  padding: 18px 20px 4px;
+
+  display: flex;
+  
+  background-color: #202020ed;
+}
+
+.App .main-controls .volume-cell {
+  width: 150px;
+  margin-right: 16px;
 }

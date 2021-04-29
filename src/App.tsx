@@ -444,27 +444,26 @@ class App extends React.Component {
             </div>
             {this.renderScaleExerciseConfig()}
             <div className="main-controls">
-              <Grid container spacing={6}>
-                <Grid item xs={6} sm={3}>
-                  <Typography gutterBottom>
-                    Volume
-                  </Typography>
-                  <Slider 
-                      value={this.state.masterVolume}
-                      onChange={(evt, newVal)=>{this.setVolume(newVal as number)}}
-                      min={0}
-                      max={1}
-                      step={0.001}/>
-                </Grid>
-                <Grid item>
-                  <ToggleButton
-                      value="play"
-                      selected={this.state.isPlaying}
-                      onChange={()=>{this.togglePlay();}}>
-                    play
-                  </ToggleButton>
-                </Grid>
-              </Grid>
+              <div className="volume-cell">
+                <Typography gutterBottom>
+                  Volume
+                </Typography>
+                <Slider 
+                  value={this.state.masterVolume}
+                  onChange={(evt, newVal)=>{this.setVolume(newVal as number)}}
+                  min={0}
+                  max={1}
+                  step={0.001}
+                />
+              </div>
+              <div className="play-pause-cell">
+                <ToggleButton
+                    value="play"
+                    selected={this.state.isPlaying}
+                    onChange={()=>{this.togglePlay();}}>
+                  play
+                </ToggleButton>
+              </div>
             </div>
           </Container>
         </div>
