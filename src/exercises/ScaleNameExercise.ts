@@ -19,6 +19,8 @@ export type ScaleNameExerciseSettings = {
   pauseBeforeNameReading: number,
   pauseBeforeEnd: number,
   repeatCount: number,
+  // scalePlayMode: 'ascending' | 'descending' , // later? (caveat: "melodic minor" scale changes asc v. desc)
+  // randomizeNoteVelocities: boolean, // later?
 }
 export type ScaleNameExerciseState = {
   isPlaying : boolean,
