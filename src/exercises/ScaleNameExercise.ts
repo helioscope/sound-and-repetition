@@ -1,7 +1,7 @@
 import { EarExerciseBase, EarExercise } from './EarExerciseBase';
 import NoteObject from "../data/NoteObject";
-import { Pitch } from "../data/pitches";
-import { MusicalScale } from "../data/scales";
+import { Pitch, pitches } from "../data/pitches";
+import { MusicalScale, scales } from "../data/scales";
 import { randomPickOne } from "../util/chanceUtil";
 import { getScaleNotes, playNoteSequence } from "../util/musicUtil";
 import { startSpeech } from "../util/speechSynthesisUtil";
@@ -30,9 +30,9 @@ export type ScaleNameExerciseState = {
   currentExerciseRepeatCount: number
 }
 
-const defaultSettings : ScaleNameExerciseSettings = {
-  rootPitchSelections: [],
-  scaleSelections: [],
+export const scaleNameExerciseDefaultSettings : ScaleNameExerciseSettings = {
+  rootPitchSelections: [pitches[0]],
+  scaleSelections: [scales.find((scale)=>{return scale.id === 'ionian';}) || scales[0]],
   scalePlaySpeed: 1,
   scalePlayCount: 1,
   pauseBetweenScalePlays: 1,
@@ -41,7 +41,7 @@ const defaultSettings : ScaleNameExerciseSettings = {
   pauseBeforeEnd: 1,
   repeatCount: 0
 }
-const defaultState : ScaleNameExerciseState = {
+export const scaleNameExerciseDefaultState : ScaleNameExerciseState = {
   isPlaying: false,
   currentPitch: null,
   currentScale: null,
@@ -53,7 +53,7 @@ export class ScaleNameExercise
     extends EarExerciseBase<ScaleNameExerciseSettings, ScaleNameExerciseState> 
     implements EarExercise<ScaleNameExerciseSettings, ScaleNameExerciseState> {
   constructor() {
-    super(defaultSettings, defaultState);
+    super(scaleNameExerciseDefaultSettings, scaleNameExerciseDefaultState);
   }
   start() {
     this.prep();
@@ -65,9 +65,7 @@ export class ScaleNameExercise
     } else {
       // poll again later
       this.doAfterPause(()=>{
-        if (this.state.isPlaying) {
-          this.start();
-        }
+        this.start();
       }, 0.25);
     }
   }
@@ -149,9 +147,6 @@ export class ScaleNameExercise
     }
   }
   onFinishScaleRead() {
-    if (this.state.isPlaying === false) {
-      return;
-    }
     if (this.state.currentExerciseRepeatCount < this.settings.repeatCount) {
       // repeat the whole performance
       this.setState({

@@ -4,11 +4,13 @@ import { cancelSpeech } from "../util/speechSynthesisUtil";
 export interface EarExercise<SettingsType, StateType> {
   start: ()=>void,
   cancel: ()=>void,
-  updateSettings: (settings: SettingsType)=>void,
+  updateSettings: (settings: SettingsType)=>SettingsType,
   getSettings: ()=>SettingsType,
   onStart: ((state: StateType) => void) | undefined
   onFinish: ((state: StateType) => void) | undefined
 }
+
+export type GenericEarExercise = EarExercise<any, any>;
 
 export class EarExerciseBase<SettingsType, StateType> {
   // provides common elements for ear exercises, and most (but not all) implemention of the EarExercise interface
@@ -40,6 +42,7 @@ export class EarExerciseBase<SettingsType, StateType> {
   }
   updateSettings(updatedSettings: Partial<SettingsType>) {
     this.settings = Object.assign({}, this.settings, updatedSettings);
+    return this.settings;
   }
   getSettings() {
     return this.settings;

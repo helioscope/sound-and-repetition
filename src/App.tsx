@@ -2,22 +2,20 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './App.css';
-import { Button, Collapse, Container, Grid, Slider, Typography } from '@material-ui/core';
+import { Container, Slider, Typography } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme, Theme } from '@material-ui/core/styles';
 import { cyan, teal } from '@material-ui/core/colors';
 import { ToggleButton } from '@material-ui/lab';
 
-import { initSynth, playNoteSequence, getScaleNotes, setMasterVolume, cancelNotesPlayback } from './util/musicUtil';
-import { startSpeech, cancelSpeech, setSpeechVolume } from './util/speechSynthesisUtil';
-import NoteObject from './data/NoteObject';
+import { initSynth, setMasterVolume } from './util/musicUtil';
+import { setSpeechVolume } from './util/speechSynthesisUtil';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
-import { randomPickOne } from './util/chanceUtil';
-import AnyAllNoneToggleSet, {ToggleItemGroupType} from './components/AnyAllNoneToggleSet';
-import DurationControl from './components/DurationControl';
-import SmallCountControl from './components/SmallCountControl';
-import MultiplierControl from './components/MultiplierControl';
-import BinaryControl from './components/BinaryControl';
+import { scaleNameExerciseDefaultSettings, ScaleNameExerciseSettings } from './exercises/ScaleNameExercise';
+import { GenericEarExercise } from './exercises/EarExerciseBase';
+import ScaleNameExerciseControls from './components/ScaleNameExerciseControls';
+import { exerciseList } from './uiConstants';
+import { ToggleItemType } from './components/AnyAllNoneToggleSet';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -30,115 +28,62 @@ const theme : Theme = createMuiTheme({
   },
 });
 
-type ExerciseId = 'intervals' | 'pitches' | 'chords' | 'scales';
-const exercises : ExerciseId[] = [
-  // 'intervals',
-  // 'pitches',
-  // 'chords',
-  'scales'
-];
-
-
-const rootPitchCollection = pitches.map((pitch)=>{
-  return {
-    label: pitch.names[0],
-    value: pitch
-  }
-});
-
-const scalesCollection = ( () : ToggleItemGroupType[] => {
-  let scaleToggleItems = scales.map((scale) => {
-    return {
-      label: scale.name,
-      key: scale.id,
-      value: scale
-    };
-  });
-  
-  return [
-    {
-      label: '7-tone',
-      items: scaleToggleItems.filter((item) => {return item.value.intervals.length === 7;})
-    },
-    {
-      label: '5-tone',
-      items: scaleToggleItems.filter((item) => {return item.value.intervals.length === 5;})
-    },
-    {
-      label: 'other',
-      items: scaleToggleItems.filter((item) => {
-        let toneCount = item.value.intervals.length;
-        return  toneCount !== 7 && toneCount !== 5;
-      })
-    },
-  ];
-})();
-
 type AppState = {
-  activeExercise: ExerciseId,
-  isPlaying: boolean,
+  activeExercise: GenericEarExercise, // since this is mutable (and self-mutates), should this be in state?
+  playEnabled: boolean,
   masterVolume: number,
 
   scaleSelections: Map<MusicalScale, boolean>,
   rootPitchSelections: Map<Pitch, boolean>,
-  exerciseState: 'not-started' | 'started' | 'completed',
-  currentScale: MusicalScale | undefined,
-  currentPitch: Pitch | undefined,
-  currentScalePlayCount: number,
-  currentExerciseRepeatCount: number,
-  advancedConfigIsOpen: boolean,
-  
-  // scalePlayMode: 'ascending' | 'descending', // later?
-  scalePlaySpeed: number,
-  scalePlayCount: number,
-  pauseBetweenScalePlays: number,
-  // randomizeNoteVelocities: boolean, // later?
-  readScaleName: boolean,
-  pauseBeforeNameReading: number,
-  repeats: number,
-  pauseBeforeEnd: number,
+  openAdvancedSettings: boolean,
+  scaleExerciseSettings: ScaleNameExerciseSettings
 };
-
-// Map doesn't have a filter() or map() method but it's easy to check if one is selected
-// Array is an easy list of selected ones, but it's harder to check if one is selected
-
-let playTimeout : number | undefined;
 
 class App extends React.Component {
   state : AppState = {
-    activeExercise: exercises[0],
-    isPlaying: false,
+    activeExercise: exerciseList[0].value,
+    playEnabled: false,
     masterVolume: 0.5,
-    exerciseState: 'not-started',
 
     rootPitchSelections: new Map().set( (pitches.find((p)=>{return p.names[0] === 'C'}) || pitches[0]) , true),
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
-    currentScale: undefined,
-    currentPitch: undefined,
-    currentScalePlayCount: 0,
-    currentExerciseRepeatCount: 0,
-    advancedConfigIsOpen: false,
-
-    scalePlaySpeed: 1,
-    scalePlayCount: 1,
-    pauseBetweenScalePlays: 1,
-    readScaleName: true,
-    pauseBeforeNameReading: 1,
-    repeats: 0,
-    pauseBeforeEnd: 1,
+    openAdvancedSettings: false,
+    scaleExerciseSettings: scaleNameExerciseDefaultSettings,
   }
   componentDidMount() {
     initSynth();
+    exerciseList.forEach((item) => {
+      const exercise : GenericEarExercise = item.value as GenericEarExercise;
+      exercise.onFinish = (exerciseState)=>{this.onFinishExercise();};
+    })
   }
   componentWillUnmount() {
     this.cancelExercise();
   }
-  adoptExercise(id:ExerciseId) {
-    this.setState({activeExercise : id});
+  adoptExercise(exercise: GenericEarExercise) {
+    if (exercise === this.state.activeExercise) {
+      return;
+    }
+    this.state.activeExercise.cancel();
+    this.setState({
+      activeExercise : exercise,
+      playEnabled: false
+    });
+  }
+  startExercise() {
+    this.state.activeExercise.start();
+  }
+  onFinishExercise() {
+    if (this.state.playEnabled) {
+      this.startExercise();
+    }
+  }
+  cancelExercise() {
+    this.state.activeExercise.cancel();
   }
   togglePlay() {
-    this.setState({ isPlaying : !this.state.isPlaying }, ()=>{
-      if (this.state.isPlaying) {
+    this.setState({ playEnabled : !this.state.playEnabled }, ()=>{
+      if (this.state.playEnabled) {
         this.startExercise();
       } else {
         this.cancelExercise();
@@ -153,129 +98,6 @@ class App extends React.Component {
       setSpeechVolume(this.state.masterVolume);
     })
   }
-  startExercise() {
-    this.prepExercise(() => {
-      if (this.state.currentPitch && this.state.currentScale) {
-        this.playScale();
-      } else {
-        // try again in a bit
-        this.doAfterPause(()=>{
-          if (this.state.isPlaying) {
-            this.startExercise();
-          }
-        }, 0.25);
-      }
-    });
-  }
-  prepExercise(completionCallback:()=>void) {
-    const selectedPitches = this.getSelectionArray<Pitch>(this.state.rootPitchSelections);
-    const selectedScales = this.getSelectionArray<MusicalScale>(this.state.scaleSelections);
-    let scale : MusicalScale | undefined;
-    let pitch : Pitch | undefined;
-    
-    if (selectedScales.length > 0) {
-      scale = randomPickOne(selectedScales);
-    }
-
-    if (selectedPitches.length > 0) {
-      pitch = randomPickOne(selectedPitches);
-    }
-
-    if (scale && pitch) {
-      this.setState({
-        currentScale: scale,
-        currentPitch: pitch,
-        currentScalePlayCount: 0,
-        exerciseState: 'unstarted'
-      }, completionCallback);
-    } else {
-      this.setState({
-        currentScale: undefined,
-        currentPitch: undefined,
-        currentScalePlayCount: 0,
-        exerciseState: 'unstarted'
-      }, completionCallback);
-    }
-  }
-  playScale() {
-    let scale : MusicalScale | undefined = this.state.currentScale;
-    let pitch : Pitch | undefined = this.state.currentPitch;
-
-    if (scale && pitch) {
-      let playDuration: number; // use seconds
-      const rootNote = new NoteObject({pitch: pitch as Pitch, octave: 3});
-      const noteInterval = 0.35 / this.state.scalePlaySpeed;
-      const noteLength = noteInterval * 0.8;
-      const noteVelocity = 0.75;
-      
-      playDuration = noteInterval * (scale.intervals.length + 1);
-
-      this.setState({
-        currentScalePlayCount: this.state.currentScalePlayCount + 1,
-        exerciseState: 'started'
-      }, ()=>{
-        playNoteSequence(getScaleNotes(rootNote, scale as MusicalScale), noteInterval, noteLength, noteVelocity);
-        this.doAfterPause(()=>{this.onFinishScalePlay();}, playDuration);
-      });
-    }
-  }
-  onFinishScalePlay() {
-    if (this.state.currentScalePlayCount < this.state.scalePlayCount) {
-      this.doAfterPause(()=>{this.playScale();}, this.state.pauseBetweenScalePlays);
-    } else if (this.state.readScaleName) {
-      this.doAfterPause(()=>{this.readScale();} ,this.state.pauseBeforeNameReading);
-    } else{
-      this.doAfterPause(()=>{this.onFinishExercise();}, this.state.pauseBeforeEnd);
-    }
-  }
-  readScale() {
-    const currentPitch = this.state.currentPitch;
-    const currentScale = this.state.currentScale;
-
-    if (currentPitch && currentScale) {
-      let scaleName = currentPitch.names[0] + " ";
-      if (currentScale.spokenName) {
-        scaleName += currentScale.spokenName;
-      } else {
-        scaleName += currentScale.name;
-      }
-      startSpeech(scaleName, {
-        volume: this.state.masterVolume,
-        onComplete: ()=>{this.onFinishScaleRead();}
-      });
-    } else {
-      throw new Error('currentPitch and currentScale must be assigned to read the scale');
-    }
-  }
-  onFinishScaleRead() {
-    if (this.state.isPlaying === false) {
-      return;
-    }
-    if (this.state.currentExerciseRepeatCount < this.state.repeats) {
-      // repeat the whole performance
-      this.setState({
-        currentExerciseRepeatCount: this.state.currentExerciseRepeatCount + 1,
-        currentScalePlayCount: 0
-      }, () => {
-        // start from beginning (maintaining the prep that was already done)
-        this.doAfterPause(()=>{this.playScale();}, this.state.pauseBeforeEnd);
-      })
-    } else {
-      this.doAfterPause(()=>{this.onFinishExercise();}, this.state.pauseBeforeEnd);
-    }
-  }
-  onFinishExercise() {
-    this.startExercise();
-  }
-  cancelExercise() {
-    clearTimeout(playTimeout);
-    playTimeout = undefined;
-    cancelNotesPlayback();
-    cancelSpeech();
-  }
-  doAfterPause(action:()=>void, delayInSeconds: number) {
-    playTimeout = window.setTimeout(action, delayInSeconds * 1000);
-  }
   getSelectionArray<ValueType>(scalesMap: Map<ValueType, boolean>) : ValueType[] {
     let selectedScales: ValueType[] = [];
     scalesMap.forEach((isSelected, scale)=>{
@@ -286,156 +108,49 @@ class App extends React.Component {
     return selectedScales;
   }
   renderScaleExerciseConfig() {
-    const scaleSelections = this.state.scaleSelections;
-    const scaleChoices = (
-      <AnyAllNoneToggleSet
-          label={"Scales:"}
-          itemCollection={scalesCollection}
-          itemToggleStates={scaleSelections}
-          onChange={(event, newSelections) => {
-            this.setState({
-              scaleSelections: newSelections
-            })
-          }}/>
-    );
-    const rootPitchSelections = this.state.rootPitchSelections;
-    const rootPitchChoices = (
-      <AnyAllNoneToggleSet
-          label={"Root pitches:"}
-          itemCollection={rootPitchCollection}
-          itemToggleStates={rootPitchSelections}
-          onChange={(event, newSelections) => {
-            this.setState({
-              rootPitchSelections: newSelections
-            })
-          }}/>
-    );
-
     return (
-      <div className="exercise-config">
-        {rootPitchChoices}
-        {scaleChoices}
-
-        <Button 
-          className="advanced-settings-toggle"
-          color="primary"
-          onClick={()=>{this.setState({advancedConfigIsOpen: !this.state.advancedConfigIsOpen})}}
-        >
-          {(this.state.advancedConfigIsOpen? "Hide" : "Show") + " Advanced Settings"}
-        </Button>
-
-        <Collapse in={this.state.advancedConfigIsOpen}>
-          <div className="advanced-settings">
-            <div className="settings-group">
-              <div className="settings-group-header">
-                Scale Playback
-              </div>
-              <div className="settings-item">
-                <MultiplierControl
-                  label={"Scale Play Speed"}
-                  inputId="scale-play-speed"
-                  value={this.state.scalePlaySpeed}
-                  onChange={(evt, newVal)=>{this.setState({scalePlaySpeed: newVal})}}
-                  min={0.1}
-                  max={4.0}
-                  step={0.1}
-                />
-              </div>
-              <div className="settings-item">
-                <SmallCountControl
-                  label={"Scale Play Count"}
-                  inputId={'scale-play-count'}
-                  value={this.state.scalePlayCount}
-                  onChange={(evt, newValue)=>{this.setState({scalePlayCount: newValue})}}
-                  min={1}
-                  max={4}
-                />
-              </div>
-              <div className="settings-item">
-                <DurationControl
-                  label={"Pause Between Plays"}
-                  inputId="pause-between-plays"
-                  value={this.state.pauseBetweenScalePlays}
-                  onChange={(evt, newVal)=>{this.setState({pauseBetweenScalePlays: newVal})}}
-                  min={0.1}
-                  max={3.5}
-                  step={0.1}
-                  disabled={this.state.scalePlayCount === 1}
-                />
-              </div>
-            </div>
-
-            <div className="settings-group">
-              <div className="settings-group-header">
-                Scale Name Reading
-              </div>
-              <div className="settings-item">
-                <BinaryControl
-                  label={"Read Scale Name"}
-                  inputId={"read-scale-name"}
-                  format={"switch"}
-                  value={this.state.readScaleName}
-                  onChange={(evt, newVal)=>{this.setState({readScaleName: newVal})}}
-                />
-              </div>
-              <div className="settings-item">
-                <DurationControl
-                  label={"Pause Before Reading"}
-                  inputId={"pause-before-reading"}
-                  value={this.state.pauseBeforeNameReading}
-                  onChange={(evt, newVal)=>{this.setState({pauseBeforeNameReading: newVal})}}
-                  min={0.1}
-                  max={3.5}
-                  step={0.1}
-                  disabled={!this.state.readScaleName}
-                />
-              </div>
-            </div>
-
-            <div className="settings-group">
-              <div className="settings-group-header">
-                Ending
-              </div>
-              <div className="settings-item">
-                <DurationControl
-                  label={"Pause Before End"}
-                  inputId="pause-before-end"
-                  value={this.state.pauseBeforeEnd}
-                  onChange={(evt, newVal)=>{this.setState({pauseBeforeEnd: newVal})}}
-                  min={0.1}
-                  max={4.0}
-                  step={0.1}
-                />
-              </div>
-              <div className="settings-item">
-                <SmallCountControl
-                  label={"Exercise Repeats"}
-                  inputId={'repeat-count'}
-                  value={this.state.repeats}
-                  onChange={(evt, newValue)=>{this.setState({repeats: newValue})}}
-                  min={0}
-                  max={4}
-                />
-              </div>
-            </div>
-          </div>
-        </Collapse>
-      </div>
-
-    );
+      <ScaleNameExerciseControls
+        settings={this.state.scaleExerciseSettings}
+        scaleSelections={this.state.scaleSelections} // todo: cleanup toggles to simply work off selection list
+        rootPitchSelections={this.state.rootPitchSelections} // todo: cleanup toggles to simply work off selection list
+        advancedConfigIsOpen={this.state.openAdvancedSettings}
+        onToggleAdvancedSettings={(nowOpen: boolean)=>{
+          this.setState({
+            openAdvancedSettings: nowOpen
+          });
+        }}
+        onChangePitchSelections={(newSelections)=>{ // todo: cleanup toggles to simply work off selection list
+          this.setState({
+            rootPitchSelections: newSelections,
+            scaleExerciseSettings: this.state.activeExercise.updateSettings({rootPitchSelections: this.getSelectionArray(newSelections)})
+          });
+        }}
+        onChangeScaleSelections={(newSelections)=>{ // todo: cleanup toggles to simply work off selection list
+          this.setState({
+            scaleSelections: newSelections,
+            scaleExerciseSettings: this.state.activeExercise.updateSettings({scaleSelections: this.getSelectionArray(newSelections)})
+          });
+        }}
+        onChangeSettings={(updatedSettings) => {
+          this.setState({
+            scaleExerciseSettings: this.state.activeExercise.updateSettings(updatedSettings)
+          });
+        }}
+      />
+    )
   }
   render() {
     const activeExercise = this.state.activeExercise;
-    const exerciseToggles = exercises.map((exerciseId:ExerciseId) => {
+    const exerciseToggles = exerciseList.map((entry: ToggleItemType) => {
       return (
         <ToggleButton 
-            key={exerciseId}
-            value={exerciseId}
-            selected={activeExercise === exerciseId}
+            key={entry.label}
+            value={entry.label}
+            selected={activeExercise === entry.value}
             onChange={() => {
-              this.adoptExercise(exerciseId);
+              this.adoptExercise(entry.value);
             }}>
-          {exerciseId}
+          {entry.label}
         </ToggleButton>
       )
     });
@@ -468,7 +183,7 @@ class App extends React.Component {
               <div className="play-pause-cell">
                 <ToggleButton
                     value="play"
-                    selected={this.state.isPlaying}
+                    selected={this.state.playEnabled}
                     onChange={()=>{this.togglePlay();}}>
                   play
                 </ToggleButton>

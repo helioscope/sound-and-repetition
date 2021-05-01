@@ -1,7 +1,14 @@
-import { ToggleItemGroupType } from "./components/AnyAllNoneToggleSet";
+import { ToggleItemGroupType, ToggleItemType } from "./components/AnyAllNoneToggleSet";
 import { pitches } from "./data/pitches";
 import { scales } from "./data/scales";
+import { ScaleNameExercise } from "./exercises/ScaleNameExercise";
 
+export const exerciseList: ToggleItemType[] = [ // move this to uiConstants and make contents ToggleItems
+  {
+    label: 'scales', 
+    value: new ScaleNameExercise()
+  }
+];
 
 export const rootPitchCollection = pitches.map((pitch)=>{
   return {
