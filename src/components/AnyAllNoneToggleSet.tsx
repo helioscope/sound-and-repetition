@@ -1,53 +1,62 @@
-import React from 'react';
+import React, { Props } from 'react';
 
 import { ToggleButton } from '@material-ui/lab';
 import { Button, Typography } from '@material-ui/core';
 
 import './AnyAllNoneToggleSet.css';
 
-export interface ToggleItemType {
+export interface ToggleItem<ValueType> {
   label : string,
   key? : string | number,
-  value: any
+  value: ValueType // probably better to use generics?
 };
 
-export interface ToggleItemGroupType {
+export interface ToggleItemGroup<ItemValueType> {
   label? : string,
   key? : string | number,
-  items : ToggleItemType[]
+  items : ToggleItem<ItemValueType>[]
 };
 
-type AnyAllNoneToggleSetProps = {
+type AnyAllNoneToggleSetProps<ItemValueType> = {
   label?: string,
-  itemCollection: ToggleItemType[] | ToggleItemGroupType | ToggleItemGroupType[],
-  itemToggleStates: Map<any, boolean>,
-  onChange: (event: React.FormEvent<HTMLButtonElement>, newSelections: Map<any, boolean>)=>void
+  itemCollection: ToggleItem<ItemValueType>[] | ToggleItemGroup<ItemValueType> | ToggleItemGroup<ItemValueType>[],
+  selectedValues: ItemValueType[],
+  onChange: (event: React.FormEvent<HTMLButtonElement>, newSelections: ItemValueType[])=>void
 }
 
-function isToggleItemGroup(thing: any): thing is ToggleItemGroupType {
-  return (thing as ToggleItemGroupType).items instanceof Array;
+function isToggleItemGroup(thing: any): thing is ToggleItemGroup<any> {
+  return (thing as ToggleItemGroup<any>).items instanceof Array;
 }
 
-export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps) {
+type TempType = any; // todo: adopt generics in component -- this string will be easier to find & replace than 'any'
+
+export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps<TempType>) { // probably better to use generics for component?
   const itemCollection = props.itemCollection;
-  const itemToggleStates = props.itemToggleStates;
-  let allItems: ToggleItemType[] = [];
-  let groups: ToggleItemGroupType[];
+  let allItems: ToggleItem<TempType>[] = [];
+  let groups: ToggleItemGroup<TempType>[];
   let toggleGroups : JSX.Element[] = [];
   let mainLabel: JSX.Element | undefined;
   let allNoneButtons: JSX.Element | undefined;
+  let selectedValues: TempType[] = props.selectedValues;
+  let itemToggleStates: Map<TempType, boolean> = new Map<TempType, boolean>();
+
+  // minor performance tweak -- instead of finding the value in selectedValues[] for every item, make a map first
+  // further performance improvements could explore react's built-in memoization features
+  selectedValues.forEach((value) => {
+    itemToggleStates.set(value, true);
+  })
 
   // handle different possible itemCollection types, converting to Array<ToggleItemGroupType>
   if (itemCollection instanceof Array) {
     if (isToggleItemGroup(itemCollection[0])) {
-      groups = itemCollection as ToggleItemGroupType[];
+      groups = itemCollection as ToggleItemGroup<TempType>[];
     } else {
       groups = [{
-        items: itemCollection as ToggleItemType[],
+        items: itemCollection as ToggleItem<TempType>[],
       }];
     }
   } else if (isToggleItemGroup(itemCollection)) {
-    groups = [itemCollection as ToggleItemGroupType];
+    groups = [itemCollection as ToggleItemGroup<TempType>];
   } else {
     throw new Error("unhandled itemCollection type");
   }
@@ -66,9 +75,20 @@ export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps) {
             selected={itemToggleStates.get(item.value)}
             size={"small"}
             onChange={(evt) => {
-              let newToggleStates = new Map(itemToggleStates);
-              newToggleStates.set(item.value, !itemToggleStates.get(item.value));
-              props.onChange(evt, newToggleStates);
+              let newSelections: TempType[] = [];
+              if (itemToggleStates.get(item.value)) { 
+                // item is selected -- remove it
+                selectedValues.forEach((selectedValue)=>{
+                  if (selectedValue !== item.value) {
+                    newSelections.push(selectedValue);
+                  }
+                });
+              } else {
+                // item is not selected -- add it
+                newSelections = selectedValues.slice();
+                newSelections.push(item.value);
+              }
+              props.onChange(evt, newSelections);
             }}>
           {item.label}
         </ToggleButton>
@@ -108,11 +128,11 @@ export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps) {
             color="primary"
             size="small"
             onClick={(evt)=>{
-              let newToggleStates = new Map();
+              let newSelections : TempType[] = [];
               allItems.forEach((item) => {
-                newToggleStates.set(item.value, true);
+                newSelections.push(item.value);
               });
-              props.onChange(evt, newToggleStates);
+              props.onChange(evt, newSelections);
             }}>
           {"All"}
         </Button>
@@ -122,11 +142,7 @@ export default function AnyAllNoneToggleSet (props:AnyAllNoneToggleSetProps) {
             color="secondary"
             size="small"
             onClick={(evt)=>{
-              let newToggleStates = new Map();
-              allItems.forEach((item) => {
-                newToggleStates.set(item.value, false);
-              });
-              props.onChange(evt, newToggleStates);
+              props.onChange(evt, []);
             }}>
           {"None"}
         </Button>

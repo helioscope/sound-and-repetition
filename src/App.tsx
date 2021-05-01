@@ -15,7 +15,7 @@ import { scaleNameExerciseDefaultSettings, ScaleNameExerciseSettings } from './e
 import { GenericEarExercise } from './exercises/EarExerciseBase';
 import ScaleNameExerciseControls from './components/ScaleNameExerciseControls';
 import { exerciseList } from './uiConstants';
-import { ToggleItemType } from './components/AnyAllNoneToggleSet';
+import { ToggleItem } from './components/AnyAllNoneToggleSet';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -98,37 +98,14 @@ class App extends React.Component {
       setSpeechVolume(this.state.masterVolume);
     })
   }
-  getSelectionArray<ValueType>(scalesMap: Map<ValueType, boolean>) : ValueType[] {
-    let selectedScales: ValueType[] = [];
-    scalesMap.forEach((isSelected, scale)=>{
-      if (isSelected) {
-        selectedScales.push(scale);
-      }
-    });
-    return selectedScales;
-  }
   renderScaleExerciseConfig() {
     return (
       <ScaleNameExerciseControls
         settings={this.state.scaleExerciseSettings}
-        scaleSelections={this.state.scaleSelections} // todo: cleanup toggles to simply work off selection list
-        rootPitchSelections={this.state.rootPitchSelections} // todo: cleanup toggles to simply work off selection list
         advancedConfigIsOpen={this.state.openAdvancedSettings}
         onToggleAdvancedSettings={(nowOpen: boolean)=>{
           this.setState({
             openAdvancedSettings: nowOpen
-          });
-        }}
-        onChangePitchSelections={(newSelections)=>{ // todo: cleanup toggles to simply work off selection list
-          this.setState({
-            rootPitchSelections: newSelections,
-            scaleExerciseSettings: this.state.activeExercise.updateSettings({rootPitchSelections: this.getSelectionArray(newSelections)})
-          });
-        }}
-        onChangeScaleSelections={(newSelections)=>{ // todo: cleanup toggles to simply work off selection list
-          this.setState({
-            scaleSelections: newSelections,
-            scaleExerciseSettings: this.state.activeExercise.updateSettings({scaleSelections: this.getSelectionArray(newSelections)})
           });
         }}
         onChangeSettings={(updatedSettings) => {
@@ -141,7 +118,7 @@ class App extends React.Component {
   }
   render() {
     const activeExercise = this.state.activeExercise;
-    const exerciseToggles = exerciseList.map((entry: ToggleItemType) => {
+    const exerciseToggles = exerciseList.map((entry: ToggleItem<GenericEarExercise>) => {
       return (
         <ToggleButton 
             key={entry.label}

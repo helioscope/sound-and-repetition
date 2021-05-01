@@ -13,36 +13,32 @@ import { MusicalScale } from '../data/scales';
 import { Pitch } from '../data/pitches';
 
 type ScaleNameExerciseControlsProps = {
-  scaleSelections: Map<MusicalScale, boolean>, // temp? -- would be better to just use exerciseSettings & onChange
-  rootPitchSelections: Map<Pitch, boolean>, // temp? -- would be better to just use exerciseSettings & onChange
   advancedConfigIsOpen: boolean,
   settings: ScaleNameExerciseSettings,
-  onChangeScaleSelections: (newSelections: Map<MusicalScale, boolean>)=>void, // temp? -- see above
-  onChangePitchSelections: (newSelections: Map<Pitch, boolean>)=>void, // temp? -- see above
   onToggleAdvancedSettings: (nowOpen: boolean)=>void,
   onChangeSettings: (changes: Partial<ScaleNameExerciseSettings>)=>void
 }
 
 export default function ScaleNameExerciseControls (props:ScaleNameExerciseControlsProps) {
   const settings = props.settings;
-  const scaleSelections = props.scaleSelections;
+  const scaleSelections = settings.scaleSelections;
   const scaleChoices = (
     <AnyAllNoneToggleSet
         label={"Scales:"}
         itemCollection={scalesCollection}
-        itemToggleStates={scaleSelections}
+        selectedValues={scaleSelections}
         onChange={(event, newSelections) => {
-          props.onChangeScaleSelections(newSelections);
+          props.onChangeSettings({scaleSelections: newSelections});
         }}/>
   );
-  const rootPitchSelections = props.rootPitchSelections;
+  const rootPitchSelections = settings.rootPitchSelections;
   const rootPitchChoices = (
     <AnyAllNoneToggleSet
         label={"Root pitches:"}
         itemCollection={rootPitchCollection}
-        itemToggleStates={rootPitchSelections}
+        selectedValues={rootPitchSelections}
         onChange={(event, newSelections) => {
-          props.onChangePitchSelections(newSelections);
+          props.onChangeSettings({rootPitchSelections: newSelections});
         }}/>
   );
 
