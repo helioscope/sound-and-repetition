@@ -35,10 +35,10 @@ export const toneIntervalExerciseDefaultSettings : ToneIntervalExerciseSettings 
   rootPitchSelections: [pitches[0]],
   intervalSelections: [toneIntervals.find((interval)=>{return interval.value === 7;}) || toneIntervals[7]],
   examplePlaySpeed: 1,
-  examplePlayCount: 1,
-  pauseBetweenExamplePlays: 1,
+  examplePlayCount: 3,
+  pauseBetweenExamplePlays: 1.5,
   readIntervalName: true,
-  pauseBeforeNameReading: 1,
+  pauseBeforeNameReading: 2,
   pauseBeforeEnd: 1,
   repeatCount: 0
 }
