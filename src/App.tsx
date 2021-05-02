@@ -11,11 +11,12 @@ import { initSynth, setMasterVolume } from './util/musicUtil';
 import { setSpeechVolume } from './util/speechSynthesisUtil';
 import { MusicalScale, scales } from './data/scales';
 import { Pitch, pitches } from './data/pitches';
-import { scaleNameExerciseDefaultSettings, ScaleNameExerciseSettings } from './exercises/ScaleNameExercise';
+import { ScaleNameExercise, scaleNameExerciseDefaultSettings, ScaleNameExerciseSettings } from './exercises/ScaleNameExercise';
 import { GenericEarExercise } from './exercises/EarExerciseBase';
 import ScaleNameExerciseControls from './components/ScaleNameExerciseControls';
-import { exerciseList } from './uiConstants';
 import { ToggleItem } from './components/AnyAllNoneToggleSet';
+import { ToneIntervalExercise, toneIntervalExerciseDefaultSettings, ToneIntervalExerciseSettings } from './exercises/ToneIntervalExercise';
+import ToneIntervalExerciseControls from './components/ToneIntervalExerciseControls';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -28,6 +29,20 @@ const theme : Theme = createMuiTheme({
   },
 });
 
+const scaleExercise = new ScaleNameExercise();
+const intervalExercise = new ToneIntervalExercise();
+
+const exerciseList: ToggleItem<GenericEarExercise>[] = [
+  {
+    label: 'scales', 
+    value: scaleExercise
+  },
+  {
+    label: 'intervals',
+    value: intervalExercise
+  }
+];
+
 type AppState = {
   activeExercise: GenericEarExercise, // since this is mutable (and self-mutates), should this be in state?
   playEnabled: boolean,
@@ -36,7 +51,8 @@ type AppState = {
   scaleSelections: Map<MusicalScale, boolean>,
   rootPitchSelections: Map<Pitch, boolean>,
   openAdvancedSettings: boolean,
-  scaleExerciseSettings: ScaleNameExerciseSettings
+  scaleExerciseSettings: ScaleNameExerciseSettings,
+  intervalExerciseSettings: ToneIntervalExerciseSettings
 };
 
 class App extends React.Component {
@@ -49,6 +65,7 @@ class App extends React.Component {
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
     openAdvancedSettings: false,
     scaleExerciseSettings: scaleNameExerciseDefaultSettings,
+    intervalExerciseSettings: toneIntervalExerciseDefaultSettings
   }
   componentDidMount() {
     initSynth();
@@ -99,22 +116,46 @@ class App extends React.Component {
     })
   }
   renderScaleExerciseConfig() {
-    return (
-      <ScaleNameExerciseControls
-        settings={this.state.scaleExerciseSettings}
-        advancedConfigIsOpen={this.state.openAdvancedSettings}
-        onToggleAdvancedSettings={(nowOpen: boolean)=>{
-          this.setState({
-            openAdvancedSettings: nowOpen
-          });
-        }}
-        onChangeSettings={(updatedSettings) => {
-          this.setState({
-            scaleExerciseSettings: this.state.activeExercise.updateSettings(updatedSettings)
-          });
-        }}
-      />
-    )
+    switch (this.state.activeExercise) {
+      case intervalExercise:
+        return (
+          <ToneIntervalExerciseControls
+            settings={this.state.intervalExerciseSettings}
+            advancedConfigIsOpen={this.state.openAdvancedSettings}
+            onToggleAdvancedSettings={(nowOpen: boolean)=>{
+              this.setState({
+                openAdvancedSettings: nowOpen
+              });
+            }}
+            onChangeSettings={(updatedSettings) => {
+              this.setState({
+                intervalExerciseSettings: this.state.activeExercise.updateSettings(updatedSettings)
+              });
+            }}
+          />
+        );
+      
+      case scaleExercise:
+        return (
+          <ScaleNameExerciseControls
+            settings={this.state.scaleExerciseSettings}
+            advancedConfigIsOpen={this.state.openAdvancedSettings}
+            onToggleAdvancedSettings={(nowOpen: boolean)=>{
+              this.setState({
+                openAdvancedSettings: nowOpen
+              });
+            }}
+            onChangeSettings={(updatedSettings) => {
+              this.setState({
+                scaleExerciseSettings: this.state.activeExercise.updateSettings(updatedSettings)
+              });
+            }}
+          />
+        );
+
+      default:
+        return '';
+    }
   }
   render() {
     const activeExercise = this.state.activeExercise;

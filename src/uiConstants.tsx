@@ -1,20 +1,19 @@
 import { ToggleItemGroup, ToggleItem } from "./components/AnyAllNoneToggleSet";
 import { Pitch, pitches } from "./data/pitches";
 import { MusicalScale, scales } from "./data/scales";
-import { GenericEarExercise } from "./exercises/EarExerciseBase";
-import { ScaleNameExercise } from "./exercises/ScaleNameExercise";
-
-export const exerciseList: ToggleItem<GenericEarExercise>[] = [ // move this to uiConstants and make contents ToggleItems
-  {
-    label: 'scales', 
-    value: new ScaleNameExercise()
-  }
-];
+import { ToneInterval, toneIntervals } from "./data/toneIntervals";
 
 export const rootPitchCollection : ToggleItem<Pitch>[] = pitches.map((pitch)=>{
   return {
     label: pitch.names[0],
     value: pitch
+  }
+});
+
+export const intervalsCollection : ToggleItem<ToneInterval>[] = toneIntervals.map((interval) => {
+  return {
+    label: interval.label,
+    value: interval
   }
 });
 
