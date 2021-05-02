@@ -13,7 +13,7 @@ export const scales : MusicalScale[] = [
   {
     id : "chromatic",
     name : "chromatic",
-    intervals: [1,1,1,1,1,1,1,1,1,1,1,1,1],
+    intervals: [1,1,1,1,1,1,1,1,1,1,1,1],
     info: "all half-tones, aka the 'twelve tone' scale",
   },
 
