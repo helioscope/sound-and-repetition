@@ -18,7 +18,7 @@ export default function MultiplierControl (props:MultiplierControlProps) {
   let className = "MultiplierControl";
   let label = null;
   let labelId = undefined;
-  const step = props.step || 1;
+  const step = props.step || 0.1;
   const marks = [];
   if (props.label) {
     labelId = props.inputId + "-label";
