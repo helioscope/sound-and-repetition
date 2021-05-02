@@ -1,4 +1,4 @@
-import React, { Props } from 'react';
+import React from 'react';
 
 import { ToggleButton } from '@material-ui/lab';
 import { Button, Typography } from '@material-ui/core';

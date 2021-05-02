@@ -9,8 +9,6 @@ import SmallCountControl from './SmallCountControl';
 
 import { ScaleNameExerciseSettings } from '../exercises/ScaleNameExercise';
 import { rootPitchCollection, scalesCollection } from '../uiConstants';
-import { MusicalScale } from '../data/scales';
-import { Pitch } from '../data/pitches';
 
 type ScaleNameExerciseControlsProps = {
   advancedConfigIsOpen: boolean,
