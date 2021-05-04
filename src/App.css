@@ -33,6 +33,10 @@
   height: 84px;
 }
 
+.App .MuiTypography-root.disabled {
+  opacity: 0.5;
+}
+
 .App .advanced-settings .settings-group-header {
   text-align: center;
   font-size: 18px;

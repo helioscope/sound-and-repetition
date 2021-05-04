@@ -21,9 +21,13 @@ export default function MultiplierControl (props:MultiplierControlProps) {
   const step = props.step || 0.1;
   const marks = [];
   if (props.label) {
+    let labelClassName = undefined;
+    if (props.disabled) {
+      labelClassName = "disabled";
+    }
     labelId = props.inputId + "-label";
     label = (
-      <Typography id={labelId} align={"center"} gutterBottom>
+      <Typography id={labelId} className={labelClassName} align={"center"} gutterBottom>
         {props.label}: {props.value}x
       </Typography>
     );

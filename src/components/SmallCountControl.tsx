@@ -22,9 +22,13 @@ export default function SmallCountControl (props:SmallCountControlProps) {
   const marks = [];
 
   if (props.label) {
+    let labelClassName = undefined;
+    if (props.disabled) {
+      labelClassName = "disabled";
+    }
     labelId = props.inputId + "-label";
     label = (
-      <Typography id={labelId} align={"center"} gutterBottom>
+      <Typography id={labelId} className={labelClassName} align={"center"} gutterBottom>
         {props.label}: {props.value}
       </Typography>
     );
