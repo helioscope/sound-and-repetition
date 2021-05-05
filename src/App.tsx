@@ -182,9 +182,6 @@ class App extends React.Component {
           </div>
           <Container>
             <div className="exercise-selector">
-              <Typography gutterBottom>
-                Exercise:
-              </Typography>
               {exerciseToggles}
             </div>
             {this.renderScaleExerciseConfig()}
