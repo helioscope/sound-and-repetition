@@ -16,6 +16,16 @@
   font-weight: bold;
 }
 
+.App .exercise-selector .MuiButtonBase-root.MuiToggleButton-root {
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: 2px;
+}
+.App .exercise-selector {
+  border-bottom: solid 1px rgba(255,255,255,0.1);
+}
+
 .App .MuiFormControl-root {
   min-width: 140px;
 }
