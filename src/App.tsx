@@ -177,6 +177,9 @@ class App extends React.Component {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <div className="App">
+          <div className="app-header">
+            <span className="title">{"Sound & Repetition"}</span>{": passive ear training"}
+          </div>
           <Container>
             <div className="exercise-selector">
               <Typography gutterBottom>
