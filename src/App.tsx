@@ -162,12 +162,14 @@ class App extends React.Component {
     const exerciseToggles = exerciseList.map((entry: ToggleItem<GenericEarExercise>) => {
       return (
         <ToggleButton 
-            key={entry.label}
-            value={entry.label}
-            selected={activeExercise === entry.value}
-            onChange={() => {
-              this.adoptExercise(entry.value);
-            }}>
+          key={entry.label}
+          value={entry.label}
+          selected={activeExercise === entry.value}
+          onChange={() => {
+            this.adoptExercise(entry.value);
+          }}
+          size={"small"}
+        >
           {entry.label}
         </ToggleButton>
       )
