@@ -28,14 +28,25 @@ export function enableAudio() {
 }
 
 
-export function playNote(note: NoteObject) {
+function prepPlayback() {
   enableAudio();
+
+  // reset transport (prevents note-doubling, time-offset issues, etc)
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+
+  // sync synth to transport so we can interrupt/clear playback
+  synth.sync();
+}
+
+export function playNote(note: NoteObject) {
+  prepPlayback();
   synth.triggerAttackRelease(note.stringify(), "8n", Tone.now());
 }
 
 export function playNoteSequence(notes: NoteObject[], delay:number=0.5, noteLengths:number[]|number=0.5, velocities:number[]|number=0.8) {
   let totalNotes = notes.length;
-  enableAudio();
+  
   if (typeof noteLengths === 'number') {
     noteLengths = new Array(totalNotes).fill(noteLengths as number);
   } else if (noteLengths instanceof Array) {
@@ -62,15 +73,22 @@ export function playNoteSequence(notes: NoteObject[], delay:number=0.5, noteLeng
   } else {
     throw new Error('velocities was provided as an unhandled type');
   }
-  
-  // reset transport (prevents note-doubling, time-offset issues, etc)
-  Tone.Transport.stop();
-  Tone.Transport.cancel();
 
-  // sync synth to transport so we can interrupt/clear playback
-  synth.sync();
+  prepPlayback();
+  
   for (let i = 0; i < totalNotes; i++) {
     synth.triggerAttackRelease(notes[i].stringify(), noteLengths[i], 0 + (delay * i), velocities[i]);
+  }
+  Tone.Transport.start();
+}
+
+export function playNotesTogether(notes: NoteObject[], duration:number=0.5, velocity:number=0.8) {
+  const totalNotes = notes.length;
+
+  prepPlayback();
+  
+  for (let i = 0; i < totalNotes; i++) {
+    synth.triggerAttackRelease(notes[i].stringify(), duration, 0, velocity);
   }
   Tone.Transport.start();
 }
