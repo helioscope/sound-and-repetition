@@ -38,9 +38,9 @@ export const chordExerciseDefaultSettings : ChordExerciseSettings = {
   examplePlaySpeed: 1,
   playInSequence: false,
   examplePlayCount: 2,
-  pauseBetweenExamplePlays: 1,
+  pauseBetweenExamplePlays: 0.5,
   readChordName: true,
-  pauseBeforeNameReading: 1,
+  pauseBeforeNameReading: 0.6,
   pauseBeforeEnd: 1,
   repeatCount: 0
 }

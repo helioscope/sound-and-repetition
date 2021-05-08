@@ -93,7 +93,7 @@ export default function ScaleNameExerciseControls (props:ChordExerciseControlsPr
             </div>
             <div className="settings-item">
               <BinaryControl
-                label={"Arpeggiate (play notes in sequence)"}
+                label={"Arpeggiate"}
                 inputId={"arpeggiate"}
                 format={"switch"}
                 value={settings.playInSequence}
