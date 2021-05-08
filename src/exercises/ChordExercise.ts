@@ -6,7 +6,7 @@ import { randomPickOne } from "../util/chanceUtil";
 import { getChordNotes, playNoteSequence, playNotesTogether } from "../util/musicUtil";
 import { startSpeech } from "../util/speechSynthesisUtil";
 
-export type ToneIntervalExerciseSettings = {
+export type ChordExerciseSettings = {
   // primary
   rootPitchSelections: Pitch[],
   chordSelections: ChordDefinition[],
@@ -24,7 +24,7 @@ export type ToneIntervalExerciseSettings = {
   // intervalOctaveRange: number, // later? (+/- interval note this number * semitones-per-octave)
   // randomizeNoteVelocities: boolean, // later?
 }
-export type ToneIntervalExerciseState = {
+export type ChordExerciseState = {
   isPlaying : boolean,
   currentPitch: Pitch | null,
   currentChord: ChordDefinition | null,
@@ -32,7 +32,7 @@ export type ToneIntervalExerciseState = {
   currentExerciseRepeatCount: number
 }
 
-export const toneIntervalExerciseDefaultSettings : ToneIntervalExerciseSettings = {
+export const chordExerciseDefaultSettings : ChordExerciseSettings = {
   rootPitchSelections: [pitches[0]],
   chordSelections: [chords.find((chord)=>{return chord.id === 'major';}) || chords[0]],
   examplePlaySpeed: 1,
@@ -44,7 +44,7 @@ export const toneIntervalExerciseDefaultSettings : ToneIntervalExerciseSettings 
   pauseBeforeEnd: 1,
   repeatCount: 0
 }
-export const toneIntervalExerciseDefaultState : ToneIntervalExerciseState = {
+export const chordExerciseDefaultState : ChordExerciseState = {
   isPlaying: false,
   currentPitch: null,
   currentChord: null,
@@ -52,11 +52,11 @@ export const toneIntervalExerciseDefaultState : ToneIntervalExerciseState = {
   currentExerciseRepeatCount: 0
 }
 
-export class ToneIntervalExercise 
-    extends EarExerciseBase<ToneIntervalExerciseSettings, ToneIntervalExerciseState> 
-    implements EarExercise<ToneIntervalExerciseSettings, ToneIntervalExerciseState> {
+export class ChordExercise 
+    extends EarExerciseBase<ChordExerciseSettings, ChordExerciseState> 
+    implements EarExercise<ChordExerciseSettings, ChordExerciseState> {
   constructor() {
-    super(toneIntervalExerciseDefaultSettings, toneIntervalExerciseDefaultState);
+    super(chordExerciseDefaultSettings, chordExerciseDefaultState);
   }
   start() {
     this.prep();
@@ -141,8 +141,8 @@ export class ToneIntervalExercise
     const currentChord = this.state.currentChord;
 
     if (currentPitch && currentChord) {
-      let intervalName = currentChord.label;
-      startSpeech(intervalName, {
+      let spokenName = currentChord.label;
+      startSpeech(spokenName, {
         onComplete: ()=>{this.onFinishNameRead();}
       });
     } else {
