@@ -58,7 +58,7 @@ export default function ScaleNameExerciseControls (props:ToneIntervalExerciseCon
         <div className="advanced-settings">
           <div className="settings-group">
             <div className="settings-group-header">
-              Scale Playback
+              Interval Playback
             </div>
             <div className="settings-item">
               <MultiplierControl
@@ -95,7 +95,7 @@ export default function ScaleNameExerciseControls (props:ToneIntervalExerciseCon
 
           <div className="settings-group">
             <div className="settings-group-header">
-              Scale Name Reading
+              Interval Name Reading
             </div>
             <div className="settings-item">
               <BinaryControl
