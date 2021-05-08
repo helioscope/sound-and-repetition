@@ -142,7 +142,7 @@ export class ToneIntervalExercise
         onComplete: ()=>{this.onFinishNameRead();}
       });
     } else {
-      throw new Error('currentPitch and currentScale must be assigned to read the scale');
+      throw new Error('currentPitch and currentInterval must be assigned to read them out');
     }
   }
   onFinishNameRead() {
