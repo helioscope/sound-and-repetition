@@ -1,4 +1,5 @@
 import { ToggleItemGroup, ToggleItem } from "./components/AnyAllNoneToggleSet";
+import { ChordDefinition, chords } from "./data/chords";
 import { Pitch, pitches } from "./data/pitches";
 import { MusicalScale, scales } from "./data/scales";
 import { ToneInterval, toneIntervals } from "./data/toneIntervals";
@@ -14,6 +15,13 @@ export const intervalsCollection : ToggleItem<ToneInterval>[] = toneIntervals.ma
   return {
     label: interval.label,
     value: interval
+  }
+});
+
+export const chordsCollection : ToggleItem<ChordDefinition>[] = chords.map((chord) => {
+  return {
+    label: chord.label,
+    value: chord
   }
 });
 

@@ -17,6 +17,8 @@ import ScaleNameExerciseControls from './components/ScaleNameExerciseControls';
 import { ToggleItem } from './components/AnyAllNoneToggleSet';
 import { ToneIntervalExercise, toneIntervalExerciseDefaultSettings, ToneIntervalExerciseSettings } from './exercises/ToneIntervalExercise';
 import ToneIntervalExerciseControls from './components/ToneIntervalExerciseControls';
+import { ChordExercise, chordExerciseDefaultSettings, ChordExerciseSettings } from './exercises/ChordExercise';
+import ChordExerciseControls from './components/ChordExerciseControls';
 
 const theme : Theme = createMuiTheme({
   palette: {
@@ -31,11 +33,16 @@ const theme : Theme = createMuiTheme({
 
 const scaleExercise = new ScaleNameExercise();
 const intervalExercise = new ToneIntervalExercise();
+const chordExercise = new ChordExercise();
 
 const exerciseList: ToggleItem<GenericEarExercise>[] = [
   {
     label: 'scales', 
     value: scaleExercise
+  },
+  {
+    label: 'chords',
+    value: chordExercise
   },
   {
     label: 'intervals',
@@ -52,7 +59,8 @@ type AppState = {
   rootPitchSelections: Map<Pitch, boolean>,
   openAdvancedSettings: boolean,
   scaleExerciseSettings: ScaleNameExerciseSettings,
-  intervalExerciseSettings: ToneIntervalExerciseSettings
+  intervalExerciseSettings: ToneIntervalExerciseSettings,
+  chordExerciseSettings: ChordExerciseSettings
 };
 
 class App extends React.Component {
@@ -65,7 +73,8 @@ class App extends React.Component {
     scaleSelections: new Map().set( (scales.find((s)=>{return s.id === 'ionian'}) || scales[0]) , true),
     openAdvancedSettings: false,
     scaleExerciseSettings: scaleNameExerciseDefaultSettings,
-    intervalExerciseSettings: toneIntervalExerciseDefaultSettings
+    intervalExerciseSettings: toneIntervalExerciseDefaultSettings,
+    chordExerciseSettings: chordExerciseDefaultSettings
   }
   componentDidMount() {
     initSynth();
@@ -152,6 +161,24 @@ class App extends React.Component {
             }}
           />
         );
+      
+        case chordExercise:
+          return (
+            <ChordExerciseControls
+              settings={this.state.chordExerciseSettings}
+              advancedConfigIsOpen={this.state.openAdvancedSettings}
+              onToggleAdvancedSettings={(nowOpen: boolean)=>{
+                this.setState({
+                  openAdvancedSettings: nowOpen
+                });
+              }}
+              onChangeSettings={(updatedSettings) => {
+                this.setState({
+                  chordExerciseSettings: this.state.activeExercise.updateSettings(updatedSettings)
+                });
+              }}
+            />
+          );
 
       default:
         return '';

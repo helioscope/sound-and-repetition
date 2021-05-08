@@ -36,11 +36,11 @@ export const chordExerciseDefaultSettings : ChordExerciseSettings = {
   rootPitchSelections: [pitches[0]],
   chordSelections: [chords.find((chord)=>{return chord.id === 'major';}) || chords[0]],
   examplePlaySpeed: 1,
-  playInSequence: true,
-  examplePlayCount: 1,
-  pauseBetweenExamplePlays: 1.5,
+  playInSequence: false,
+  examplePlayCount: 2,
+  pauseBetweenExamplePlays: 1,
   readChordName: true,
-  pauseBeforeNameReading: 2,
+  pauseBeforeNameReading: 1,
   pauseBeforeEnd: 1,
   repeatCount: 0
 }
@@ -141,7 +141,7 @@ export class ChordExercise
     const currentChord = this.state.currentChord;
 
     if (currentPitch && currentChord) {
-      let spokenName = currentChord.label;
+      let spokenName = currentPitch.names[0] + "-" + currentChord.label;
       startSpeech(spokenName, {
         onComplete: ()=>{this.onFinishNameRead();}
       });
