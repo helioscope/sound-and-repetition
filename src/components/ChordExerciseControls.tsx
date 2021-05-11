@@ -74,9 +74,19 @@ export default function ScaleNameExerciseControls (props:ChordExerciseControlsPr
               <SmallCountControl
                 label={"Chord Play Count"}
                 inputId={'chord-play-count'}
-                value={settings.examplePlayCount}
-                onChange={(evt, newValue)=>{props.onChangeSettings({examplePlayCount: newValue})}}
+                value={settings.simultaneousPlayCount}
+                onChange={(evt, newValue)=>{props.onChangeSettings({simultaneousPlayCount: newValue})}}
                 min={1}
+                max={4}
+              />
+            </div>
+            <div className="settings-item">
+              <SmallCountControl
+                label={"Arpeggio Play Count"}
+                inputId={'arp-play-count'}
+                value={settings.sequentialPlayCount}
+                onChange={(evt, newValue)=>{props.onChangeSettings({sequentialPlayCount: newValue})}}
+                min={0}
                 max={4}
               />
             </div>
@@ -88,16 +98,7 @@ export default function ScaleNameExerciseControls (props:ChordExerciseControlsPr
                 onChange={(evt, newVal)=>{props.onChangeSettings({pauseBetweenExamplePlays: newVal})}}
                 min={0.1}
                 max={3.5}
-                disabled={settings.examplePlayCount === 1}
-              />
-            </div>
-            <div className="settings-item">
-              <BinaryControl
-                label={"Arpeggiate"}
-                inputId={"arpeggiate"}
-                format={"switch"}
-                value={settings.playInSequence}
-                onChange={(evt, newVal)=>{props.onChangeSettings({playInSequence: newVal})}}
+                disabled={settings.simultaneousPlayCount + settings.sequentialPlayCount === 1}
               />
             </div>
           </div>

@@ -13,8 +13,8 @@ export type ChordExerciseSettings = {
 
   // secondary
   examplePlaySpeed: number,
-  examplePlayCount: number,
-  playInSequence: boolean,
+  simultaneousPlayCount: number,
+  sequentialPlayCount: number,
   pauseBetweenExamplePlays: number,
   readChordName: boolean,
   pauseBeforeNameReading: number,
@@ -28,7 +28,8 @@ export type ChordExerciseState = {
   isPlaying : boolean,
   currentPitch: Pitch | null,
   currentChord: ChordDefinition | null,
-  currentExamplePlayCount: number,
+  simultaneousPlayCount: number,
+  sequentialPlayCount: number,
   currentExerciseRepeatCount: number
 }
 
@@ -36,8 +37,8 @@ export const chordExerciseDefaultSettings : ChordExerciseSettings = {
   rootPitchSelections: [pitches[0]],
   chordSelections: [chords.find((chord)=>{return chord.id === 'major';}) || chords[0]],
   examplePlaySpeed: 1,
-  playInSequence: false,
-  examplePlayCount: 2,
+  simultaneousPlayCount: 1,
+  sequentialPlayCount: 1,
   pauseBetweenExamplePlays: 0.5,
   readChordName: true,
   pauseBeforeNameReading: 0.6,
@@ -48,7 +49,8 @@ export const chordExerciseDefaultState : ChordExerciseState = {
   isPlaying: false,
   currentPitch: null,
   currentChord: null,
-  currentExamplePlayCount: 0,
+  simultaneousPlayCount: 0,
+  sequentialPlayCount: 0,
   currentExerciseRepeatCount: 0
 }
 
@@ -90,14 +92,16 @@ export class ChordExercise
       this.setState({
         currentChord: chord,
         currentPitch: pitch,
-        currentExamplePlayCount: 0,
+        simultaneousPlayCount: 0,
+        sequentialPlayCount: 0,
         currentExerciseRepeatCount: 0
       });
     } else {
       this.setState({
         currentChord: null,
         currentPitch: null,
-        currentExamplePlayCount: 0,
+        simultaneousPlayCount: 0,
+        sequentialPlayCount: 0,
         currentExerciseRepeatCount: 0
       });
     }
@@ -116,19 +120,24 @@ export class ChordExercise
       
       playDuration = noteInterval * notes.length;
 
-      this.setState({
-        currentExamplePlayCount: this.state.currentExamplePlayCount + 1
-      });
-      if (this.settings.playInSequence) {
-        playNoteSequence(notes, noteInterval, noteLength, noteVelocity);
-      } else {
+      if (this.state.simultaneousPlayCount < this.settings.simultaneousPlayCount) {
+        this.setState({
+          simultaneousPlayCount: this.state.simultaneousPlayCount + 1
+        });
         playNotesTogether(notes, noteLength, noteVelocity);
+      } else {
+        this.setState({
+          sequentialPlayCount: this.state.sequentialPlayCount + 1
+        });
+        playNoteSequence(notes, noteInterval, noteLength, noteVelocity);
       }
       this.doAfterPause(()=>{this.onFinishScalePlay();}, playDuration);
     }
   }
   onFinishScalePlay() {
-    if (this.state.currentExamplePlayCount < this.settings.examplePlayCount) {
+    if (this.state.simultaneousPlayCount < this.settings.simultaneousPlayCount) {
+      this.doAfterPause(()=>{this.playExample();}, this.settings.pauseBetweenExamplePlays);
+    } else if (this.state.sequentialPlayCount < this.settings.sequentialPlayCount) {
       this.doAfterPause(()=>{this.playExample();}, this.settings.pauseBetweenExamplePlays);
     } else if (this.settings.readChordName) {
       this.doAfterPause(()=>{this.readScale();} ,this.settings.pauseBeforeNameReading);
@@ -154,7 +163,8 @@ export class ChordExercise
       // repeat the whole performance
       this.setState({
         currentExerciseRepeatCount: this.state.currentExerciseRepeatCount + 1,
-        currentExamplePlayCount: 0
+        simultaneousPlayCount: 0,
+        sequentialPlayCount: 0,
       });
       // start from beginning (maintaining the prep that was already done)
       this.doAfterPause(()=>{this.playExample();}, this.settings.pauseBeforeEnd);
