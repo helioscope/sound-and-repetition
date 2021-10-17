@@ -1,3 +1,15 @@
+# About Sound & Repetition
+
+Sound & Repetition is an ear-training / listening tool to help learn & recognize scales, chords, tonal intervals. It's intended to be audio-only--something you can listen to while washing the dishes, watching your kids at the playground, etc.
+
+It's a pretty rough proof-of-concept right now, but still useable.
+
+It's built with React (using create-react-app), Material-UI, TypeScript, and ToneJS. (In fact, it was started partly as an exercise to learn / try out TypeScript & Material-UI.)
+
+
+What follows is the default "Create React App" readme, which is still mostly applicable:
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
