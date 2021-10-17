@@ -23,3 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 /src/_old
+personal_notes
+
